@@ -18,8 +18,8 @@
     <SignAssembly>$(SignAssembly)</SignAssembly>
     <AssemblyOriginatorKeyFile>$(KeyFilePath)</AssemblyOriginatorKeyFile>
     <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
-    <Description>TBD</Description>
-    <PackageTags>TBD</PackageTags>
+    <Description>Type-safe configuration builder for .NET with Result pattern error handling and environment variable expansion. Supports JSON files, embedded resources, user secrets, and custom validation with a chainable API.</Description>
+    <PackageTags>configuration;appsettings;result-pattern;fluent-api;type-safe;environment-variables;validation;json;dotnet;csharp;netcore;configuration-builder;user-secrets;baubit</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
