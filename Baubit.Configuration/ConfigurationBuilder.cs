@@ -77,11 +77,11 @@ namespace Baubit.Configuration
 
     public class ConfigurationBuilder<TConfiguration> : ConfigurationBuilder where TConfiguration : AConfiguration
     {
-        public Result<TConfiguration> Build()
+        public new Result<TConfiguration> Build()
         {
             return base.Build()
                        .Bind(configuration => Result.Try(() => configuration.Get<TConfiguration>() ?? 
-                             Activator.CreateInstance<TConfiguration>()!))
+                                                               Activator.CreateInstance<TConfiguration>()!))
                        .Bind(configuration => configuration.ExpandURIs());
         }
     }
