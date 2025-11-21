@@ -1,7 +1,9 @@
 <Solution>
   <Folder Name="/SubModules/">
-    <Project Path="SubModules/Baubit.Traceability/Baubit.Traceability.Tests/Baubit.Traceability.Tests.csproj" />
-    <Project Path="SubModules/Baubit.Traceability/Baubit.Traceability/Baubit.Traceability.csproj" />
+    <Project Path="SubModules/Baubit.Reflection/Baubit.Reflection.Test/Baubit.Reflection.Test.csproj" />
+    <Project Path="SubModules/Baubit.Reflection/Baubit.Reflection/Baubit.Reflection.csproj" />
+    <Project Path="SubModules/Baubit.Reflection/SubModules/Baubit.Traceability/Baubit.Traceability.Tests/Baubit.Traceability.Tests.csproj" />
+    <Project Path="SubModules/Baubit.Reflection/SubModules/Baubit.Traceability/Baubit.Traceability/Baubit.Traceability.csproj" />
   </Folder>
   <Project Path="Baubit.Configuration/Baubit.Configuration.csproj" />
 </Solution>
