@@ -1,5 +1,6 @@
 ﻿using Baubit.Configuration.Traceability;
 using Baubit.Traceability;
+using Baubit.Validation;
 using FluentResults;
 using Microsoft.Extensions.Configuration;
 
@@ -77,12 +78,21 @@ namespace Baubit.Configuration
 
     public class ConfigurationBuilder<TConfiguration> : ConfigurationBuilder where TConfiguration : AConfiguration
     {
+        private List<IValidator<TConfiguration>> validators = new List<IValidator<TConfiguration>>();
+        public Result<ConfigurationBuilder<TConfiguration>> WithValidators(params IValidator<TConfiguration>[] validators)
+        {
+            return Result.Try(() => { this.validators.AddRange(validators); })
+                         .Bind(() => Result.Ok(this));
+        }
+
         public new Result<TConfiguration> Build()
         {
             return base.Build()
-                       .Bind(configuration => Result.Try(() => configuration.Get<TConfiguration>() ?? 
+                       .Bind(configuration => Result.Try(() => configuration.Get<TConfiguration>() ??
                                                                Activator.CreateInstance<TConfiguration>()!))
-                       .Bind(configuration => configuration.ExpandURIs());
+                       .Bind(configuration => configuration.ExpandURIs())
+                       .Bind(configuration => validators.Aggregate(Result.Ok(), (seed, next) => seed.Bind(() => next.Run(configuration)))
+                                                        .Bind(() => Result.Ok(configuration)));
         }
     }
 }
