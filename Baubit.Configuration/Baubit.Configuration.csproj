@@ -27,4 +27,12 @@
     <None Include="../LICENSE" Pack="true" PackagePath="." />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <PackageReference Include="Baubit.Traceability" Version="2025.46.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Release'">
+    <ProjectReference Include="..\SubModules\Baubit.Traceability\Baubit.Traceability\Baubit.Traceability.csproj" />
+  </ItemGroup>
+
 </Project>
