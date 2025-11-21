@@ -27,14 +27,9 @@
     <None Include="../LICENSE" Pack="true" PackagePath="." />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+  <ItemGroup>
     <PackageReference Include="Baubit.Reflection" Version="2025.46.1" />
     <PackageReference Include="Baubit.Validation" Version="2025.47.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)' != 'Release'">
-    <ProjectReference Include="..\SubModules\Baubit.Reflection\Baubit.Reflection\Baubit.Reflection.csproj" />
-    <ProjectReference Include="..\SubModules\Baubit.Validation\Baubit.Validation\Baubit.Validation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

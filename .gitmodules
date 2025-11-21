@@ -1,6 +1,0 @@
-[submodule "SubModules/Baubit.Reflection"]
-	path = SubModules/Baubit.Reflection
-	url = https://github.com/pnagoorkar/Baubit.Reflection.git
-[submodule "SubModules/Baubit.Validation"]
-	path = SubModules/Baubit.Validation
-	url = https://github.com/pnagoorkar/Baubit.Validation.git
