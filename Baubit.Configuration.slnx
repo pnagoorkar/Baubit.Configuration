@@ -1,4 +1,8 @@
 <Solution>
-  <Folder Name="/SubModules/" />
+  <Folder Name="/SubModules/">
+    <Project Path="SubModules/Baubit.Reflection/Baubit.Reflection/Baubit.Reflection.csproj" />
+    <Project Path="SubModules/Baubit.Traceability/Baubit.Traceability/Baubit.Traceability.csproj" />
+    <Project Path="SubModules/Baubit.Validation/Baubit.Validation/Baubit.Validation.csproj" />
+  </Folder>
   <Project Path="Baubit.Configuration/Baubit.Configuration.csproj" />
 </Solution>
