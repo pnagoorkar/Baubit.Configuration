@@ -1,18 +1,16 @@
 ﻿using Baubit.Configuration.Traceability;
-
 using Baubit.Traceability;
 using FluentResults;
 using Microsoft.Extensions.Configuration;
 
 namespace Baubit.Configuration
 {
-
-    public sealed class ConfigurationBuilder : IDisposable
+    public class ConfigurationBuilder : IDisposable
     {
         private ConfigurationSourceBuilder _configurationSourceBuilder;
         private List<IConfiguration> additionalConfigs = new List<IConfiguration>();
         private bool _isDisposed;
-        private ConfigurationBuilder()
+        protected ConfigurationBuilder()
         {
             _configurationSourceBuilder = ConfigurationSourceBuilder.CreateNew().Value;
         }
@@ -74,6 +72,17 @@ namespace Baubit.Configuration
                 }
                 _isDisposed = true;
             }
+        }
+    }
+
+    public class ConfigurationBuilder<TConfiguration> : ConfigurationBuilder where TConfiguration : AConfiguration
+    {
+        public Result<TConfiguration> Build()
+        {
+            return base.Build()
+                       .Bind(configuration => Result.Try(() => configuration.Get<TConfiguration>() ?? 
+                             Activator.CreateInstance<TConfiguration>()!))
+                       .Bind(configuration => configuration.ExpandURIs());
         }
     }
 }
