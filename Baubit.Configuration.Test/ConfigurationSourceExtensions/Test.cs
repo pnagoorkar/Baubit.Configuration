@@ -449,9 +449,12 @@ namespace Baubit.Configuration.Test.ConfigurationSourceExtensions
 
             try
             {
+                // Create proper file:// URI that works cross-platform
+                var fileUri = new Uri(Path.GetFullPath(tempFile)).AbsoluteUri;
+                
                 var configSource = new ConfigSource(
                     new List<string>(),
-                    new List<string> { $"file:///{tempFile.Replace('\\', '/')}" },
+                    new List<string> { fileUri },
                     new List<string>(),
                     new List<string>()
                 );
@@ -518,13 +521,13 @@ namespace Baubit.Configuration.Test.ConfigurationSourceExtensions
 
             try
             {
+                // Create proper file:// URIs that work cross-platform
+                var fileUri1 = new Uri(Path.GetFullPath(tempFile1)).AbsoluteUri;
+                var fileUri2 = new Uri(Path.GetFullPath(tempFile2)).AbsoluteUri;
+                
                 var configSource = new ConfigSource(
                     new List<string>(),
-                    new List<string> 
-                    { 
-                        $"file:///{tempFile1.Replace('\\', '/')}",
-                        $"file:///{tempFile2.Replace('\\', '/')}"
-                    },
+                    new List<string> { fileUri1, fileUri2 },
                     new List<string>(),
                     new List<string>()
                 );
@@ -628,9 +631,12 @@ namespace Baubit.Configuration.Test.ConfigurationSourceExtensions
 
             try
             {
+                // Create proper file:// URI that works cross-platform
+                var fileUri = new Uri(Path.GetFullPath(tempFile)).AbsoluteUri;
+                
                 var configSource = new ConfigSource(
                     new List<string> { "{\"RawKey\":\"RawValue\"}" },
-                    new List<string> { $"file:///{tempFile.Replace('\\', '/')}" },
+                    new List<string> { fileUri },
                     new List<string>(),
                     new List<string>()
                 );
