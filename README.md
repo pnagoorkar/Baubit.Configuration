@@ -4,17 +4,16 @@
 [![codecov](https://codecov.io/gh/pnagoorkar/Baubit.Configuration/branch/master/graph/badge.svg)](https://codecov.io/gh/pnagoorkar/Baubit.Configuration)
 [![NuGet](https://img.shields.io/nuget/v/Baubit.Configuration.svg)](https://www.nuget.org/packages/Baubit.Configuration)
 
-Type-safe, fluent configuration builder for .NET with Result pattern error handling and environment variable expansion.
+Type-safe configuration builder for .NET with Result pattern error handling and environment variable expansion.
 
 ## Features
 
-- **Fluent API** - Chain configuration sources naturally
 - **Type-Safe** - Bind configuration to strongly-typed classes
-- **Result Pattern** - No exceptions, explicit error handling
-- **URI Expansion** - `${VAR}` placeholders with environment variables
+- **Result Pattern** - Explicit error handling without exceptions
+- **Environment Variable Expansion** - `${VAR}` syntax in configuration values
 - **Multiple Sources** - JSON files, embedded resources, raw strings, user secrets
-- **Validation** - Built-in validator pipeline
-- **Disposal Safety** - Single-use builders with automatic cleanup
+- **Validation** - Custom validator pipeline support
+- **Fluent API** - Chainable configuration methods
 
 ## Installation
 
@@ -48,9 +47,9 @@ public record AppConfig : AConfiguration
     public int MaxRetries { get; init; }
 }
 
-var result = new ConfigurationBuilder<AppConfig>()
-    .WithRawJsonStrings("{\"ConnectionString\":\"...\",\"MaxRetries\":3}")
-    .Bind(b => b.Build());
+var builder = ConfigurationBuilder<AppConfig>.CreateNew();
+builder.WithRawJsonStrings("{\"ConnectionString\":\"...\",\"MaxRetries\":3}");
+var result = builder.Build();
 
 if (result.IsSuccess)
 {
@@ -70,9 +69,9 @@ public record PathConfig : AConfiguration
 
 // With LogPath = "${HOME}/logs" in JSON
 // Automatically expands to "/home/user/logs"
-var result = new ConfigurationBuilder<PathConfig>()
-    .WithRawJsonStrings("{\"LogPath\":\"${HOME}/logs\"}")
-    .Bind(b => b.Build());
+var builder = ConfigurationBuilder<PathConfig>.CreateNew();
+builder.WithRawJsonStrings("{\"LogPath\":\"${HOME}/logs\"}");
+var result = builder.Build();
 ```
 
 ### Multiple Configuration Sources
@@ -89,6 +88,8 @@ var result = ConfigurationBuilder.CreateNew()
 ### Validation
 
 ```csharp
+using Baubit.Configuration.Validation;
+
 public class AppConfigValidator : AValidator<AppConfig>
 {
     public override Result Run(AppConfig config)
@@ -100,10 +101,10 @@ public class AppConfigValidator : AValidator<AppConfig>
     }
 }
 
-var result = new ConfigurationBuilder<AppConfig>()
-    .WithRawJsonStrings(json)
-    .Bind(b => b.WithValidators(new AppConfigValidator()))
-    .Bind(b => b.Build());
+var builder = ConfigurationBuilder<AppConfig>.CreateNew();
+builder.WithRawJsonStrings("{\"ConnectionString\":\"test\",\"MaxRetries\":3}");
+builder.WithValidators(new AppConfigValidator());
+var result = builder.Build();
 ```
 
 ## Configuration Sources
@@ -116,9 +117,9 @@ var result = new ConfigurationBuilder<AppConfig>()
 | User Secrets | `WithLocalSecrets("SecretId")` | Secret ID |
 | Additional Config | `WithAdditionalConfigurations(config)` | IConfiguration |
 
-## URI Expansion
+## Environment Variable Expansion
 
-Mark properties with `[URI]` attribute for automatic environment variable expansion:
+Properties marked with `[URI]` attribute support automatic environment variable expansion using `${VAR}` syntax:
 
 ```csharp
 public record Config : AConfiguration
@@ -133,7 +134,7 @@ public record Config : AConfiguration
 }
 ```
 
-**Syntax:** `${VARIABLE_NAME}` - Fails if variable doesn't exist
+**Syntax:** `${VARIABLE_NAME}` - Build fails with error if variable doesn't exist
 
 ## API Reference
 
@@ -174,23 +175,15 @@ if (result.IsFailed)
         Console.WriteLine(error.Message);
     }
 }
-
-// Or throw on failure
-var config = builder.Build().ThrowIfFailed().Value;
 ```
 
 ## Best Practices
 
-✅ **Do:**
 - Use typed configuration classes inheriting `AConfiguration`
 - Validate configuration with `IValidator<T>`
-- Handle Result failures explicitly
-- Use URI expansion for environment-specific values
-
-❌ **Don't:**
-- Reuse builder instances (auto-disposed after Build)
-- Ignore Result failures
-- Store sensitive data in code
+- Handle `Result` failures explicitly
+- Use `[URI]` attribute for environment-specific values
+- Avoid storing sensitive data in code
 
 ## Examples
 
@@ -208,24 +201,27 @@ public record ProductionConfig : AConfiguration
     public int PoolSize { get; init; }
 }
 
-var result = ConfigurationBuilder<ProductionConfig>().CreateNew()
-    .WithJsonUriStrings("file:///etc/app/config.json")
-    .Bind(b => b.WithLocalSecrets("ProductionSecrets"))
-    .Bind(b => b.WithValidators(new ProductionValidator()))
-    .Bind(b => b.Build());
+var builder = ConfigurationBuilder<ProductionConfig>.CreateNew();
+builder.WithJsonUriStrings("file:///etc/app/config.json");
+builder.WithLocalSecrets("ProductionSecrets");
+builder.WithValidators(new ProductionValidator());
+var result = builder.Build();
 ```
 
 ### Testing Configuration
 
 ```csharp
-var testConfig = ConfigurationBuilder<AppConfig>().CreateNew()
-    .WithRawJsonStrings(@"{
-        ""ConnectionString"": ""Server=localhost;Database=test"",
-        ""MaxRetries"": 3
-    }")
-    .Bind(b => b.Build())
-    .ThrowIfFailed()
-    .Value;
+var builder = ConfigurationBuilder<AppConfig>.CreateNew();
+builder.WithRawJsonStrings(@"{
+    ""ConnectionString"": ""Server=localhost;Database=test"",
+    ""MaxRetries"": 3
+}");
+var result = builder.Build();
+
+if (result.IsSuccess)
+{
+    var testConfig = result.Value;
+}
 ```
 
 ## License
@@ -234,11 +230,10 @@ Licensed under the terms specified in [LICENSE](LICENSE).
 
 ## Contributing
 
-Contributions welcome! This project maintains:
-- 80%+ test coverage
-- Comprehensive XML documentation
+Contributions welcome! This project uses:
 - Result pattern for error handling
-- .NET 9.0 target
+- Comprehensive XML documentation
+- .NET 9.0 target framework
 
 ---
 
