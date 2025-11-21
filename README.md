@@ -217,7 +217,11 @@ builder.WithRawJsonStrings(@"{
     ""MaxRetries"": 3
 }");
 var result = builder.Build();
-var testConfig = result.Value;
+
+if (result.IsSuccess)
+{
+    var testConfig = result.Value;
+}
 ```
 
 ## License
