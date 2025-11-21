@@ -102,7 +102,7 @@ public class AppConfigValidator : AValidator<AppConfig>
 }
 
 var builder = new ConfigurationBuilder<AppConfig>();
-builder.WithRawJsonStrings(json);
+builder.WithRawJsonStrings("{\"ConnectionString\":\"test\",\"MaxRetries\":3}");
 builder.WithValidators(new AppConfigValidator());
 var result = builder.Build();
 ```
