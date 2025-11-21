@@ -4,6 +4,10 @@
     <Project Path="SubModules/Baubit.Reflection/Baubit.Reflection.Test/Baubit.Reflection.Test.csproj" />
     <Project Path="SubModules/Baubit.Reflection/Baubit.Reflection/Baubit.Reflection.csproj" />
   </Folder>
+  <Folder Name="/SubModules/Reflection/SubModules/">
+    <Project Path="SubModules/Baubit.Reflection/SubModules/Baubit.Traceability/Baubit.Traceability.Tests/Baubit.Traceability.Tests.csproj" />
+    <Project Path="SubModules/Baubit.Reflection/SubModules/Baubit.Traceability/Baubit.Traceability/Baubit.Traceability.csproj" />
+  </Folder>
   <Folder Name="/SubModules/Traceability/">
     <Project Path="SubModules/Baubit.Traceability/Baubit.Traceability.Tests/Baubit.Traceability.Tests.csproj" />
     <Project Path="SubModules/Baubit.Traceability/Baubit.Traceability/Baubit.Traceability.csproj" />
@@ -11,6 +15,10 @@
   <Folder Name="/SubModules/Validation/">
     <Project Path="SubModules/Baubit.Validation/Baubit.Validation.Test/Baubit.Validation.Test.csproj" />
     <Project Path="SubModules/Baubit.Validation/Baubit.Validation/Baubit.Validation.csproj" />
+  </Folder>
+  <Folder Name="/SubModules/Validation/SubModules/">
+    <Project Path="SubModules/Baubit.Validation/SubModules/Baubit.Traceability/Baubit.Traceability.Tests/Baubit.Traceability.Tests.csproj" />
+    <Project Path="SubModules/Baubit.Validation/SubModules/Baubit.Traceability/Baubit.Traceability/Baubit.Traceability.csproj" />
   </Folder>
   <Project Path="Baubit.Configuration/Baubit.Configuration.csproj" />
 </Solution>
