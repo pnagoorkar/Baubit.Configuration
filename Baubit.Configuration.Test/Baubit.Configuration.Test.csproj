@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Baubit.Configuration\Baubit.Configuration.csproj" />
+  </ItemGroup>
+
 </Project>
