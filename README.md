@@ -119,7 +119,7 @@ var result = builder.Build();
 
 ## Environment Variable Expansion
 
-Properties marked with `[URI]` attribute support automatic environment variable expansion:
+Properties marked with `[URI]` attribute support automatic environment variable expansion using `${VAR}` syntax:
 
 ```csharp
 public record Config : AConfiguration
@@ -134,7 +134,7 @@ public record Config : AConfiguration
 }
 ```
 
-**Syntax:** `${VARIABLE_NAME}` - Returns error if variable doesn't exist
+**Syntax:** `${VARIABLE_NAME}` - Build fails with error if variable doesn't exist
 
 ## API Reference
 
