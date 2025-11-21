@@ -20,5 +20,6 @@
     <Project Path="SubModules/Baubit.Validation/SubModules/Baubit.Traceability/Baubit.Traceability.Tests/Baubit.Traceability.Tests.csproj" />
     <Project Path="SubModules/Baubit.Validation/SubModules/Baubit.Traceability/Baubit.Traceability/Baubit.Traceability.csproj" />
   </Folder>
+  <Project Path="Baubit.Configuration.Test/Baubit.Configuration.Test.csproj" Id="aebb0ebd-3fda-45c0-8c61-1fe01d7af4fa" />
   <Project Path="Baubit.Configuration/Baubit.Configuration.csproj" />
 </Solution>
