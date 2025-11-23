@@ -1,6 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <ResolveSubModulesFromRoot>true</ResolveSubModulesFromRoot>
-    <Traceability>$(MSBuildThisFileDirectory)SubModules\Baubit.Traceability\Baubit.Traceability\Baubit.Traceability.csproj</Traceability>
-  </PropertyGroup>
-</Project>
