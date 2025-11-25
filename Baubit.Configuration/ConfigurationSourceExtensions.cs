@@ -4,6 +4,10 @@ using Baubit.Traceability;
 using Baubit.Traceability.Exceptions;
 using FluentResults;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -48,10 +52,10 @@ namespace Baubit.Configuration
             return Result.OkIf(configurationSource != null, "ConfigurationSource cannot be null")
                          .Bind(() => configurationSource.ExpandURIs())
                          .Bind(configSource => configurationSource.AddJsonFiles(configurationBuilder))
-                         .Bind(configurationSource => configurationSource.LoadResourceFiles())
-                         .Bind(configurationSource => configurationSource.AddRawJsonStrings(configurationBuilder))
-                         .Bind(configurationSource => configurationSource.AddSecrets(configurationBuilder))
-                         .Bind(configurationSource => AddAdditionalConfigurations(configurationBuilder, additionalConfigs))
+                         .Bind(cs => cs.LoadResourceFiles())
+                         .Bind(cs => cs.AddRawJsonStrings(configurationBuilder))
+                         .Bind(cs => cs.AddSecrets(configurationBuilder))
+                         .Bind(_ => AddAdditionalConfigurations(configurationBuilder, additionalConfigs))
                          .Bind(() => Result.Ok<IConfiguration>(configurationBuilder.Build()));
         }
 
@@ -108,12 +112,18 @@ namespace Baubit.Configuration
         /// <returns>A <see cref="Result"/> indicating success or failure.</returns>
         private static Result ExpandPropertyUri(PropertyInfo property, object obj)
         {
-            return property.PropertyType switch
+            if (property.PropertyType == typeof(string))
             {
-                Type t when t == typeof(string) => ExpandStringProperty(property, obj),
-                Type t when t == typeof(List<string>) => ExpandListProperty(property, obj),
-                _ => Result.Fail($"Unsupported URI property type: {property.PropertyType.Name}")
-            };
+                return ExpandStringProperty(property, obj);
+            }
+            else if (property.PropertyType == typeof(List<string>))
+            {
+                return ExpandListProperty(property, obj);
+            }
+            else
+            {
+                return Result.Fail($"Unsupported URI property type: {property.PropertyType.Name}");
+            }
         }
 
         /// <summary>
@@ -201,11 +211,14 @@ namespace Baubit.Configuration
         /// <returns>An <see cref="IError"/> representing the error.</returns>
         private static IError HandleMissingEnvVariables(Exception exp)
         {
-            return exp switch
+            if (exp is EnvironmentVariableNotFound envVarNotFoundExp)
             {
-                EnvironmentVariableNotFound envVarNotFoundExp => new EnvVarNotFound(envVarNotFoundExp.EnvVariable),
-                _ => new ExceptionalError(exp)
-            };
+                return new EnvVarNotFound(envVarNotFoundExp.EnvVariable);
+            }
+            else
+            {
+                return new ExceptionalError(exp);
+            }
         }
 
         /// <summary>
@@ -335,6 +348,9 @@ namespace Baubit.Configuration
         }
 
         /// <summary>
+        /// Adds raw JSON strings as configuration streams.
+        /// </summary>
+        /// <param name="configurationSource">The source containing raw JSON strings.</param>
         /// Adds raw JSON strings as configuration streams.
         /// </summary>
         /// <param name="configurationSource">The source containing raw JSON strings.</param>
