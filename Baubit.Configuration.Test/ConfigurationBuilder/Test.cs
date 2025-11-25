@@ -8,7 +8,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
     #region Test Helpers
 
     // Test configuration class
-    public record TestConfiguration : AConfiguration
+    public class TestConfiguration : AConfiguration
     {
         public string? TestValue { get; set; }
         public int TestNumber { get; set; }

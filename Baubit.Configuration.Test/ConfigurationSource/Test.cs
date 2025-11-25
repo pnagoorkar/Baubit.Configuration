@@ -181,13 +181,8 @@
             var localSecrets = new List<string> { "SecretId" };
 
             // Act
-            var configSource = new Configuration.ConfigurationSource
-            {
-                RawJsonStrings = rawJsonStrings,
-                JsonUriStrings = jsonUriStrings,
-                EmbeddedJsonResources = embeddedJsonResources,
-                LocalSecrets = localSecrets
-            };
+
+            var configSource = new Configuration.ConfigurationSource(rawJsonStrings, jsonUriStrings, embeddedJsonResources, localSecrets);
 
             // Assert
             Assert.Same(rawJsonStrings, configSource.RawJsonStrings);
@@ -337,10 +332,7 @@
         public void Properties_WithInitializers_ShouldAllowModification()
         {
             // Arrange
-            var configSource = new Configuration.ConfigurationSource
-            {
-                RawJsonStrings = new List<string> { "{\"initial\":\"value\"}" }
-            };
+            var configSource = new Configuration.ConfigurationSource(rawJsonStrings: new List<string> { "{\"initial\":\"value\"}" }, new List<string>(), new List<string>(), new List<string>());
 
             // Act
             configSource.RawJsonStrings.Add("{\"added\":\"value\"}");

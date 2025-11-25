@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace Baubit.Configuration
 {
@@ -8,13 +9,13 @@ namespace Baubit.Configuration
     public class ConfigurationSource
     {
         public static ConfigurationSource Empty => new ConfigurationSource();
-        public List<string> RawJsonStrings { get; init; }
+        public List<string> RawJsonStrings { get; private set; }
         [URI]
-        public List<string> JsonUriStrings { get; init; }
+        public List<string> JsonUriStrings { get; private set; }
         [URI]
-        public List<string> EmbeddedJsonResources { get; init; }
+        public List<string> EmbeddedJsonResources { get; private set; }
         [URI]
-        public List<string> LocalSecrets { get; init; }
+        public List<string> LocalSecrets { get; private set; }
 
         public ConfigurationSource(List<string> rawJsonStrings,
                                    List<string> jsonUriStrings,

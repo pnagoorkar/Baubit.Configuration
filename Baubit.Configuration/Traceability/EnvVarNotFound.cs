@@ -4,10 +4,10 @@ namespace Baubit.Configuration.Traceability
 {
     public class EnvVarNotFound : AError
     {
-        public string EnvVariable { get; init; }
-        public EnvVarNotFound(string envVar) : base([], $"Environemnt variable: {envVar} not found", default)
+        public string EnvVariable { get; private set; }
+        public EnvVarNotFound(string envVariable) : base(new System.Collections.Generic.List<FluentResults.IError>(), $"Environemnt variable: {envVariable} not found", default)
         {
-            EnvVariable = envVar;
+            EnvVariable = envVariable;
         }
     }
 }
