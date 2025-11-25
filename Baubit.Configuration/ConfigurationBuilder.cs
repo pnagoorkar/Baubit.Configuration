@@ -3,6 +3,9 @@ using Baubit.Traceability;
 using Baubit.Validation;
 using FluentResults;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Baubit.Configuration
 {
@@ -457,7 +460,7 @@ namespace Baubit.Configuration
         {
             return base.Build()
                        .Bind(configuration => Result.Try(() => configuration.Get<TConfiguration>() ??
-                                                               Activator.CreateInstance<TConfiguration>()!))
+                                                               Activator.CreateInstance<TConfiguration>()))
                        .Bind(configuration => configuration.ExpandURIs())
                        .Bind(configuration => validators.Aggregate(Result.Ok(), (seed, next) => seed.Bind(() => next.Run(configuration)))
                                                         .Bind(() => Result.Ok(configuration)));

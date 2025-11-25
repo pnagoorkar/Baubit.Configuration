@@ -1,8 +1,12 @@
 ﻿# Baubit.Configuration
 
+
 [![CircleCI](https://dl.circleci.com/status-badge/img/circleci/TpM4QUH8Djox7cjDaNpup5/2zTgJzKbD2m3nXCf5LKvqS/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/TpM4QUH8Djox7cjDaNpup5/2zTgJzKbD2m3nXCf5LKvqS/tree/master)
-[![codecov](https://codecov.io/gh/pnagoorkar/Baubit.Configuration/branch/master/graph/badge.svg)](https://codecov.io/gh/pnagoorkar/Baubit.Configuration)
-[![NuGet](https://img.shields.io/nuget/v/Baubit.Configuration.svg)](https://www.nuget.org/packages/Baubit.Configuration)
+[![codecov](https://codecov.io/gh/pnagoorkar/Baubit.Configuration/branch/master/graph/badge.svg)](https://codecov.io/gh/pnagoorkar/Baubit.Configuration)<br/>
+[![NuGet](https://img.shields.io/nuget/v/Baubit.Configuration.svg)](https://www.nuget.org/packages/Baubit.Configuration/)
+![.NET Standard 2.0](https://img.shields.io/badge/.NET%20Standard-2.0-512BD4?logo=dotnet&logoColor=white)<br/>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Known Vulnerabilities](https://snyk.io/test/github/pnagoorkar/Baubit.Configuration/badge.svg)](https://snyk.io/test/github/pnagoorkar/Baubit.Configuration)
 
 Type-safe configuration builder for .NET with Result pattern error handling and environment variable expansion.
 
@@ -41,7 +45,7 @@ if (result.IsSuccess)
 ### Type-Safe Configuration
 
 ```csharp
-public record AppConfig : AConfiguration
+public class AppConfig : AConfiguration
 {
     public string ConnectionString { get; init; }
     public int MaxRetries { get; init; }
@@ -61,7 +65,7 @@ if (result.IsSuccess)
 ### Environment Variable Expansion
 
 ```csharp
-public record PathConfig : AConfiguration
+public class PathConfig : AConfiguration
 {
     [URI]
     public string LogPath { get; init; }
@@ -122,7 +126,7 @@ var result = builder.Build();
 Properties marked with `[URI]` attribute support automatic environment variable expansion using `${VAR}` syntax:
 
 ```csharp
-public record Config : AConfiguration
+public class Config : AConfiguration
 {
     [URI]
     public string DatabasePath { get; init; }  // Expands ${DB_PATH}
@@ -190,7 +194,7 @@ if (result.IsFailed)
 ### Production Configuration
 
 ```csharp
-public record ProductionConfig : AConfiguration
+public class ProductionConfig : AConfiguration
 {
     [URI]
     public string DatabaseConnection { get; init; }
@@ -233,7 +237,6 @@ Licensed under the terms specified in [LICENSE](LICENSE).
 Contributions welcome! This project uses:
 - Result pattern for error handling
 - Comprehensive XML documentation
-- .NET 9.0 target framework
 
 ---
 
