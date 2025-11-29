@@ -38,6 +38,7 @@ namespace Baubit.Configuration
     /// </example>
     public class ConfigurationBuilder : IDisposable
     {
+        public const string ConfigurationSectionKey = "configuration";
         private ConfigurationSourceBuilder _configurationSourceBuilder;
         private List<IConfiguration> additionalConfigs = new List<IConfiguration>();
         private bool _isDisposed;
@@ -278,6 +279,11 @@ namespace Baubit.Configuration
             return _configurationSourceBuilder.WithAdditionaConfigurationSourcesFrom(configurations).Bind(_ => Result.Ok(this));
         }
 
+        public Result<ConfigurationBuilder> WithAdditionalConfigurationSources(params ConfigurationSource[] configurationSources)
+        {
+            return _configurationSourceBuilder.WithAdditionalConfigurationSources(configurationSources).Bind(_ => Result.Ok(this));
+        }
+
         /// <summary>
         /// Adds additional configurations extracted from existing <see cref="IConfiguration"/> instances.
         /// Extracts the "configuration" section from each provided configuration and merges them with the final configuration.
@@ -323,7 +329,7 @@ namespace Baubit.Configuration
 
         private static Result<IConfigurationSection> GetObjectConfigurationSection(IConfiguration configurationSection)
         {
-            var objectConfigurationSection = configurationSection.GetSection("configuration");
+            var objectConfigurationSection = configurationSection.GetSection(ConfigurationSectionKey);
             return objectConfigurationSection.Exists() ?
                    Result.Ok(objectConfigurationSection) :
                    Result.Fail(Enumerable.Empty<IError>()).WithReason(new ConfigurationNotDefined());

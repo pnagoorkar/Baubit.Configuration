@@ -18,6 +18,7 @@ namespace Baubit.Configuration
     /// </remarks>
     public sealed class ConfigurationSourceBuilder : IDisposable
     {
+        public const string ConfigurationSourceSectionKey = "configurationSource";
         private List<string> RawJsonStrings { get; set; } = new List<string>();
         private List<string> JsonUriStrings { get; set; } = new List<string>();
         private List<string> EmbeddedJsonResources { get; set; } = new List<string>();
@@ -233,7 +234,7 @@ namespace Baubit.Configuration
 
         private static Result<IConfigurationSection> GetObjectConfigurationSourceSection(IConfiguration configurationSection)
         {
-            var objectConfigurationSourceSection = configurationSection.GetSection("configurationSource");
+            var objectConfigurationSourceSection = configurationSection.GetSection(ConfigurationSourceSectionKey);
             return objectConfigurationSourceSection.Exists() ?
                    Result.Ok(objectConfigurationSourceSection) :
                    Result.Fail(Enumerable.Empty<IError>()).WithReason(new ConfigurationSourceNotDefined());
