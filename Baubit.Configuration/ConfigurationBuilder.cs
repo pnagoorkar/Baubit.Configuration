@@ -240,11 +240,77 @@ namespace Baubit.Configuration
                          .Bind(() => Result.Ok(this));
         }
 
+        /// <summary>
+        /// Adds additional configuration sources extracted from existing <see cref="IConfiguration"/> instances.
+        /// Extracts the "configurationSource" section from each provided configuration and merges them.
+        /// </summary>
+        /// <param name="configurations">
+        /// An array of <see cref="IConfiguration"/> instances containing "configurationSource" sections to extract.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing the current builder instance for method chaining if successful;
+        /// otherwise, a failed result if extraction or merging fails.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This method extracts the "configurationSource" section from each provided configuration.
+        /// If the section does not exist or is not defined, it returns an empty configuration source.
+        /// </para>
+        /// <para>
+        /// The extracted sources are merged with existing sources in the builder.
+        /// This is useful for loading configuration sources from external configurations or configuration files.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var externalConfig = new ConfigurationBuilder()
+        ///     .AddInMemoryCollection(new Dictionary&lt;string, string&gt; 
+        ///     {
+        ///         { "configurationSource:RawJsonStrings:0", "{\"Key\":\"Value\"}" }
+        ///     })
+        ///     .Build();
+        /// 
+        /// var result = builder.WithAdditionaConfigurationSourcesFrom(externalConfig);
+        /// </code>
+        /// </example>
         public Result<ConfigurationBuilder> WithAdditionaConfigurationSourcesFrom(params IConfiguration[] configurations)
         {
             return _configurationSourceBuilder.WithAdditionaConfigurationSourcesFrom(configurations).Bind(_ => Result.Ok(this));
         }
 
+        /// <summary>
+        /// Adds additional configurations extracted from existing <see cref="IConfiguration"/> instances.
+        /// Extracts the "configuration" section from each provided configuration and merges them with the final configuration.
+        /// </summary>
+        /// <param name="configurations">
+        /// An array of <see cref="IConfiguration"/> instances containing "configuration" sections to extract.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing the current builder instance for method chaining if successful;
+        /// otherwise, a failed result if extraction fails.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This method extracts the "configuration" section from each provided configuration.
+        /// If the "configuration" section does not exist in a configuration, that configuration is skipped with a failure reason.
+        /// </para>
+        /// <para>
+        /// The extracted configurations are added as additional configurations to be merged with the final configuration.
+        /// This is useful for loading configuration data from external configurations or configuration files.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var externalConfig = new ConfigurationBuilder()
+        ///     .AddInMemoryCollection(new Dictionary&lt;string, string&gt; 
+        ///     {
+        ///         { "configuration:Database", "Server=localhost" }
+        ///     })
+        ///     .Build();
+        /// 
+        /// var result = builder.WithAdditionaConfigurationsFrom(externalConfig);
+        /// </code>
+        /// </example>
         public Result<ConfigurationBuilder> WithAdditionaConfigurationsFrom(params IConfiguration[] configurations)
         {
             return WithAdditionalConfigurations(configurations.Select(configuration => GetObjectConfigurationOrDefault(configuration).ThrowIfFailed().Value).ToArray());

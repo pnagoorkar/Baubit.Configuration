@@ -120,6 +120,8 @@ var result = builder.Build();
 | Raw JSON | `WithRawJsonStrings("{...}")` | JSON strings |
 | User Secrets | `WithLocalSecrets("SecretId")` | Secret ID |
 | Additional Config | `WithAdditionalConfigurations(config)` | IConfiguration |
+| Configuration Sources | `WithAdditionaConfigurationSourcesFrom(config)` | IConfiguration with "configurationSource" section |
+| Configuration Data | `WithAdditionaConfigurationsFrom(config)` | IConfiguration with "configuration" section |
 
 ## Environment Variable Expansion
 
@@ -154,6 +156,8 @@ WithEmbeddedJsonResources(params string[] resources) : Result<ConfigurationBuild
 WithLocalSecrets(params string[] secrets) : Result<ConfigurationBuilder>
 WithRawJsonStrings(params string[] json) : Result<ConfigurationBuilder>
 WithAdditionalConfigurations(params IConfiguration[] configs) : Result<ConfigurationBuilder>
+WithAdditionaConfigurationSourcesFrom(params IConfiguration[] configs) : Result<ConfigurationBuilder>
+WithAdditionaConfigurationsFrom(params IConfiguration[] configs) : Result<ConfigurationBuilder>
 Build() : Result<IConfiguration>
 ```
 
@@ -188,6 +192,8 @@ if (result.IsFailed)
 - Handle `Result` failures explicitly
 - Use `[URI]` attribute for environment-specific values
 - Avoid storing sensitive data in code
+- Use `WithAdditionaConfigurationSourcesFrom` to load configuration sources from external configurations
+- Use `WithAdditionaConfigurationsFrom` to load configuration data from external configurations
 
 ## Examples
 
@@ -225,6 +231,43 @@ var result = builder.Build();
 if (result.IsSuccess)
 {
     var testConfig = result.Value;
+}
+```
+
+### Loading Configuration from External Sources
+
+```csharp
+// Load configuration sources from another configuration
+var externalConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+    .AddInMemoryCollection(new Dictionary<string, string> 
+    {
+        { "configurationSource:RawJsonStrings:0", "{\"Key\":\"Value\"}" }
+    })
+    .Build();
+
+var builder = ConfigurationBuilder.CreateNew();
+builder.WithAdditionaConfigurationSourcesFrom(externalConfig);
+var result = builder.Build();
+```
+
+### Loading Configuration Data from External Sources
+
+```csharp
+// Load configuration data from another configuration
+var externalConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+    .AddInMemoryCollection(new Dictionary<string, string> 
+    {
+        { "configuration:Database", "Server=localhost" }
+    })
+    .Build();
+
+var builder = ConfigurationBuilder.CreateNew();
+builder.WithAdditionaConfigurationsFrom(externalConfig);
+var result = builder.Build();
+
+if (result.IsSuccess)
+{
+    var value = result.Value["Database"]; // "Server=localhost"
 }
 ```
 
