@@ -240,6 +240,29 @@ namespace Baubit.Configuration
                          .Bind(() => Result.Ok(this));
         }
 
+        public Result<ConfigurationBuilder> WithAdditionaConfigurationSourcesFrom(params IConfiguration[] configurations)
+        {
+            return _configurationSourceBuilder.WithAdditionaConfigurationSourcesFrom(configurations).Bind(_ => Result.Ok(this));
+        }
+
+        public Result<ConfigurationBuilder> WithAdditionaConfigurationsFrom(params IConfiguration[] configurations)
+        {
+            return WithAdditionalConfigurations(configurations.Select(configuration => GetObjectConfigurationOrDefault(configuration).ThrowIfFailed().Value).ToArray());
+        }
+
+        private static Result<IConfigurationSection> GetObjectConfigurationOrDefault(IConfiguration configuration)
+        {
+            return Result.Ok(GetObjectConfigurationSection(configuration).ValueOrDefault);
+        }
+
+        private static Result<IConfigurationSection> GetObjectConfigurationSection(IConfiguration configurationSection)
+        {
+            var objectConfigurationSection = configurationSection.GetSection("configuration");
+            return objectConfigurationSection.Exists() ?
+                   Result.Ok(objectConfigurationSection) :
+                   Result.Fail(Enumerable.Empty<IError>()).WithReason(new ConfigurationNotDefined());
+        }
+
         /// <summary>
         /// Builds and returns an <see cref="IConfiguration"/> instance containing all the configuration sources added to this builder.
         /// The builder is automatically disposed after this method completes successfully.
@@ -375,6 +398,24 @@ namespace Baubit.Configuration
     public class ConfigurationBuilder<TConfiguration> : ConfigurationBuilder where TConfiguration : AConfiguration
     {
         private List<IValidator<TConfiguration>> validators = new List<IValidator<TConfiguration>>();
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ConfigurationBuilder{TConfiguration}"/>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing a new <see cref="ConfigurationBuilder{TConfiguration}"/> instance.
+        /// </returns>
+        /// <example>
+        /// <code>
+        /// var builderResult = ConfigurationBuilder&lt;MyConfiguration&gt;.CreateNew();
+        /// if (builderResult.IsSuccess)
+        /// {
+        ///     var builder = builderResult.Value;
+        ///     // Use the builder...
+        /// }
+        /// </code>
+        /// </example>
+        public static new Result<ConfigurationBuilder<TConfiguration>> CreateNew() => Result.Ok(new ConfigurationBuilder<TConfiguration>());
 
         /// <summary>
         /// Adds one or more validators to the validation pipeline for the configuration object.

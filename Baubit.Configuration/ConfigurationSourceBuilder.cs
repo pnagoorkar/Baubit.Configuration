@@ -1,6 +1,7 @@
 ﻿using Baubit.Configuration.Traceability;
 using Baubit.Traceability;
 using FluentResults;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -132,6 +133,45 @@ namespace Baubit.Configuration
                          .AddReasonIfFailed(new ConfigurationBuilderDisposed())
                          .Bind(() => Result.Try(() => RawJsonStrings.AddRange(rawJsonStrings)))
                          .Bind(() => Result.Ok(this));
+        }
+
+        public Result<ConfigurationSourceBuilder> WithAdditionalConfigurationSources(params ConfigurationSource[] configSources)
+        {
+            var rawJsonStrings = new List<string>();
+            var jsonUriStrings = new List<string>();
+            var embeddedJsonResources = new List<string>();
+            var localSecrets = new List<string>();
+            return Result.Try(() =>
+            {
+                foreach (var configSource in configSources)
+                {
+                    rawJsonStrings.AddRange(configSource.RawJsonStrings);
+                    jsonUriStrings.AddRange(configSource.JsonUriStrings);
+                    embeddedJsonResources.AddRange(configSource.EmbeddedJsonResources);
+                    localSecrets.AddRange(configSource.LocalSecrets);
+                }
+            }).Bind(() => WithRawJsonStrings(rawJsonStrings.ToArray()))
+              .Bind(_ => WithJsonUriStrings(jsonUriStrings.ToArray()))
+              .Bind(_ => WithEmbeddedJsonResources(embeddedJsonResources.ToArray()))
+              .Bind(_ => WithLocalSecrets(localSecrets.ToArray()));
+        }
+
+        public Result<ConfigurationSourceBuilder> WithAdditionaConfigurationSourcesFrom(params IConfiguration[] configurations)
+        {
+            return WithAdditionalConfigurationSources(configurations.Select(configuration => GetObjectConfigurationSourceOrDefault(configuration).ThrowIfFailed().Value).ToArray());
+        }
+
+        private static Result<ConfigurationSource> GetObjectConfigurationSourceOrDefault(IConfiguration configuration)
+        {
+            return Result.Ok(GetObjectConfigurationSourceSection(configuration).ValueOrDefault?.Get<ConfigurationSource>() ?? BuildEmpty().Value);
+        }
+
+        private static Result<IConfigurationSection> GetObjectConfigurationSourceSection(IConfiguration configurationSection)
+        {
+            var objectConfigurationSourceSection = configurationSection.GetSection("configurationSource");
+            return objectConfigurationSourceSection.Exists() ?
+                   Result.Ok(objectConfigurationSourceSection) :
+                   Result.Fail(Enumerable.Empty<IError>()).WithReason(new ConfigurationSourceNotDefined());
         }
 
         /// <summary>
