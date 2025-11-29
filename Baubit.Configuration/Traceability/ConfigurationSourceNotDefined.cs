@@ -7,7 +7,7 @@ namespace Baubit.Configuration.Traceability
     /// This reason is used when attempting to extract a configuration source section that does not exist.
     /// </summary>
     /// <remarks>
-    /// This reason is typically returned when using methods like <see cref="ConfigurationSourceBuilder.WithAdditionaConfigurationSourcesFrom"/>
+    /// This reason is typically returned when using methods like <see cref="ConfigurationSourceBuilder.WithAdditionalConfigurationSourcesFrom"/>
     /// and the provided configuration does not contain a "configurationSource" section.
     /// </remarks>
     public class ConfigurationSourceNotDefined : AReason

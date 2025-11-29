@@ -1,4 +1,5 @@
 ﻿using Baubit.Configuration.Traceability;
+using Microsoft.Extensions.Configuration;
 
 namespace Baubit.Configuration.Test.ConfigurationSourceBuilder
 {
@@ -546,6 +547,39 @@ namespace Baubit.Configuration.Test.ConfigurationSourceBuilder
             
             // The built configuration should have its own copy
             Assert.Single(result.Value.RawJsonStrings.Where(s => s == json));
+        }
+
+        #endregion
+
+        #region Constants Tests
+
+        [Fact]
+        public void ConfigurationSourceSectionKey_ShouldHaveExpectedValue()
+        {
+            // Act
+            var value = Configuration.ConfigurationSourceBuilder.ConfigurationSourceSectionKey;
+
+            // Assert
+            Assert.Equal("configurationSource", value);
+        }
+
+        [Fact]
+        public void ConfigurationSourceSectionKey_UsedInGetObjectConfigurationSourceSection_ShouldExtractCorrectSection()
+        {
+            // Arrange
+            var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { $"{Configuration.ConfigurationSourceBuilder.ConfigurationSourceSectionKey}:RawJsonStrings:0", "{\"Key\":\"Value\"}" }
+                })
+                .Build();
+
+            // Act
+            var section = config.GetSection(Configuration.ConfigurationSourceBuilder.ConfigurationSourceSectionKey);
+
+            // Assert
+            Assert.True(section.Exists());
+            Assert.Equal("{\"Key\":\"Value\"}", section["RawJsonStrings:0"]);
         }
 
         #endregion

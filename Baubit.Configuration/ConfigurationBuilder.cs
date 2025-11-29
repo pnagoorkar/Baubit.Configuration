@@ -38,6 +38,15 @@ namespace Baubit.Configuration
     /// </example>
     public class ConfigurationBuilder : IDisposable
     {
+        /// <summary>
+        /// The configuration section key used to identify configuration data within an <see cref="IConfiguration"/> instance.
+        /// This constant is used when extracting configuration sections via <see cref="WithAdditionalConfigurationsFrom"/>.
+        /// </summary>
+        /// <remarks>
+        /// When loading configurations from external sources, this key identifies the section containing
+        /// the actual configuration data to be merged. The value is "configuration".
+        /// </remarks>
+        public const string ConfigurationSectionKey = "configuration";
         private ConfigurationSourceBuilder _configurationSourceBuilder;
         private List<IConfiguration> additionalConfigs = new List<IConfiguration>();
         private bool _isDisposed;
@@ -270,12 +279,52 @@ namespace Baubit.Configuration
         ///     })
         ///     .Build();
         /// 
-        /// var result = builder.WithAdditionaConfigurationSourcesFrom(externalConfig);
+        /// var result = builder.WithAdditionalConfigurationSourcesFrom(externalConfig);
         /// </code>
         /// </example>
-        public Result<ConfigurationBuilder> WithAdditionaConfigurationSourcesFrom(params IConfiguration[] configurations)
+        public Result<ConfigurationBuilder> WithAdditionalConfigurationSourcesFrom(params IConfiguration[] configurations)
         {
-            return _configurationSourceBuilder.WithAdditionaConfigurationSourcesFrom(configurations).Bind(_ => Result.Ok(this));
+            return _configurationSourceBuilder.WithAdditionalConfigurationSourcesFrom(configurations).Bind(_ => Result.Ok(this));
+        }
+
+        /// <summary>
+        /// Adds pre-built <see cref="ConfigurationSource"/> instances to the builder by merging their sources.
+        /// This method directly adds configuration sources without extracting from <see cref="IConfiguration"/> instances.
+        /// </summary>
+        /// <param name="configurationSources">
+        /// An array of <see cref="ConfigurationSource"/> instances whose sources will be merged with the current builder.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing the current builder instance for method chaining if successful;
+        /// otherwise, a failed result with appropriate error information.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This method delegates to <see cref="ConfigurationSourceBuilder.WithAdditionalConfigurationSources"/>
+        /// to merge all source types (RawJsonStrings, JsonUriStrings, EmbeddedJsonResources, LocalSecrets)
+        /// from the provided configuration sources into the current builder.
+        /// </para>
+        /// <para>
+        /// This is useful when you have existing <see cref="ConfigurationSource"/> objects that you want to
+        /// compose together or reuse across multiple configuration builds.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var baseSource = ConfigurationSourceBuilder.CreateNew()
+        ///     .Bind(b => b.WithRawJsonStrings("{\"BaseKey\":\"BaseValue\"}"))
+        ///     .Bind(b => b.Build())
+        ///     .Value;
+        /// 
+        /// var result = ConfigurationBuilder.CreateNew()
+        ///     .Bind(b => b.WithAdditionalConfigurationSources(baseSource))
+        ///     .Bind(b => b.WithRawJsonStrings("{\"AdditionalKey\":\"AdditionalValue\"}"))
+        ///     .Bind(b => b.Build());
+        /// </code>
+        /// </example>
+        public Result<ConfigurationBuilder> WithAdditionalConfigurationSources(params ConfigurationSource[] configurationSources)
+        {
+            return _configurationSourceBuilder.WithAdditionalConfigurationSources(configurationSources).Bind(_ => Result.Ok(this));
         }
 
         /// <summary>
@@ -308,10 +357,10 @@ namespace Baubit.Configuration
         ///     })
         ///     .Build();
         /// 
-        /// var result = builder.WithAdditionaConfigurationsFrom(externalConfig);
+        /// var result = builder.WithAdditionalConfigurationsFrom(externalConfig);
         /// </code>
         /// </example>
-        public Result<ConfigurationBuilder> WithAdditionaConfigurationsFrom(params IConfiguration[] configurations)
+        public Result<ConfigurationBuilder> WithAdditionalConfigurationsFrom(params IConfiguration[] configurations)
         {
             return WithAdditionalConfigurations(configurations.Select(configuration => GetObjectConfigurationOrDefault(configuration).ThrowIfFailed().Value).ToArray());
         }
@@ -323,7 +372,7 @@ namespace Baubit.Configuration
 
         private static Result<IConfigurationSection> GetObjectConfigurationSection(IConfiguration configurationSection)
         {
-            var objectConfigurationSection = configurationSection.GetSection("configuration");
+            var objectConfigurationSection = configurationSection.GetSection(ConfigurationSectionKey);
             return objectConfigurationSection.Exists() ?
                    Result.Ok(objectConfigurationSection) :
                    Result.Fail(Enumerable.Empty<IError>()).WithReason(new ConfigurationNotDefined());

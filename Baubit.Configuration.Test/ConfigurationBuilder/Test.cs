@@ -777,22 +777,53 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
 
         #endregion
 
-        #region ConfigurationBuilder - WithAdditionaConfigurationSourcesFrom Tests
+        #region ConfigurationBuilder - Constants Tests
 
         [Fact]
-        public void WithAdditionaConfigurationSourcesFrom_WithValidConfigurationSource_ShouldSucceed()
+        public void ConfigurationSectionKey_ShouldHaveExpectedValue()
+        {
+            // Act
+            var value = Configuration.ConfigurationBuilder.ConfigurationSectionKey;
+
+            // Assert
+            Assert.Equal("configuration", value);
+        }
+
+        [Fact]
+        public void ConfigurationSectionKey_UsedInGetSection_ShouldExtractCorrectSection()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var sourceConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    { "configurationSource:RawJsonStrings:0", "{\"Key\":\"Value\"}" }
+                    { $"{Configuration.ConfigurationBuilder.ConfigurationSectionKey}:TestKey", "TestValue" }
                 })
                 .Build();
 
             // Act
-            var result = builder.WithAdditionaConfigurationSourcesFrom(sourceConfig);
+            var section = config.GetSection(Configuration.ConfigurationBuilder.ConfigurationSectionKey);
+
+            // Assert
+            Assert.True(section.Exists());
+            Assert.Equal("TestValue", section["TestKey"]);
+        }
+
+        #endregion
+
+        #region ConfigurationBuilder - WithAdditionalConfigurationSources Tests
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_WithSingleSource_ShouldSucceed()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key\":\"Value\"}"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(configSource);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -800,25 +831,21 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         }
 
         [Fact]
-        public void WithAdditionaConfigurationSourcesFrom_WithMultipleConfigurations_ShouldMergeSources()
+        public void WithAdditionalConfigurationSources_WithMultipleSources_ShouldMergeAll()
         {
             // Arrange
             var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var sourceConfig1 = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    { "configurationSource:RawJsonStrings:0", "{\"Key1\":\"Value1\"}" }
-                })
-                .Build();
-            var sourceConfig2 = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    { "configurationSource:RawJsonStrings:0", "{\"Key2\":\"Value2\"}" }
-                })
-                .Build();
+            var source1 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
+                .Bind(b => b.Build())
+                .Value;
+            var source2 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key2\":\"Value2\"}"))
+                .Bind(b => b.Build())
+                .Value;
 
             // Act
-            var result = builder.WithAdditionaConfigurationSourcesFrom(sourceConfig1, sourceConfig2)
+            var result = builder.WithAdditionalConfigurationSources(source1, source2)
                                .Bind(b => b.Build());
 
             // Assert
@@ -828,53 +855,77 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         }
 
         [Fact]
-        public void WithAdditionaConfigurationSourcesFrom_WithMissingConfigurationSource_ShouldUseEmptySource()
+        public void WithAdditionalConfigurationSources_CombinedWithOtherMethods_ShouldAccumulate()
         {
             // Arrange
             var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var sourceConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    { "SomeOtherKey", "SomeValue" }
-                })
-                .Build();
+            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"SourceKey\":\"SourceValue\"}"))
+                .Bind(b => b.Build())
+                .Value;
 
             // Act
-            var result = builder.WithAdditionaConfigurationSourcesFrom(sourceConfig)
+            var result = builder.WithRawJsonStrings("{\"BuilderKey\":\"BuilderValue\"}")
+                               .Bind(b => b.WithAdditionalConfigurationSources(configSource))
                                .Bind(b => b.Build());
 
             // Assert
             Assert.True(result.IsSuccess);
+            Assert.Equal("BuilderValue", result.Value["BuilderKey"]);
+            Assert.Equal("SourceValue", result.Value["SourceKey"]);
         }
 
         [Fact]
-        public void WithAdditionaConfigurationSourcesFrom_WithAllSourceTypes_ShouldMergeAll()
+        public void WithAdditionalConfigurationSources_WithAllSourceTypes_ShouldMergeEverything()
         {
             // Arrange
             var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var sourceConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    { "configurationSource:RawJsonStrings:0", "{\"Key1\":\"Value1\"}" },
-                    { "configurationSource:JsonUriStrings:0", "file:///test.json" },
-                    { "configurationSource:EmbeddedJsonResources:0", "TestApp;Config.json" },
-                    { "configurationSource:LocalSecrets:0", "TestSecret" }
-                })
-                .Build();
+            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"RawKey\":\"RawValue\"}"))
+                .Bind(b => b.WithJsonUriStrings("file:///test.json"))
+                .Bind(b => b.WithEmbeddedJsonResources("TestApp;Config.json"))
+                .Bind(b => b.WithLocalSecrets("TestSecret"))
+                .Bind(b => b.Build())
+                .Value;
 
             // Act
-            var result = builder.WithAdditionaConfigurationSourcesFrom(sourceConfig);
+            var result = builder.WithAdditionalConfigurationSources(configSource);
 
             // Assert
             Assert.True(result.IsSuccess);
         }
 
+        [Fact]
+        public void WithAdditionalConfigurationSources_CalledMultipleTimes_ShouldAccumulate()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var source1 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
+                .Bind(b => b.Build())
+                .Value;
+            var source2 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key2\":\"Value2\"}"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(source1)
+                               .Bind(b => b.WithAdditionalConfigurationSources(source2))
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("Value1", result.Value["Key1"]);
+            Assert.Equal("Value2", result.Value["Key2"]);
+        }
+
         #endregion
 
-        #region ConfigurationBuilder - WithAdditionaConfigurationsFrom Tests
+        #region ConfigurationBuilder - WithAdditionalConfigurationsFrom Tests
 
         [Fact]
-        public void WithAdditionaConfigurationsFrom_WithValidConfiguration_ShouldSucceed()
+        public void WithAdditionalConfigurationsFrom_WithValidConfiguration_ShouldSucceed()
         {
             // Arrange
             var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
@@ -886,7 +937,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
                 .Build();
 
             // Act
-            var result = builder.WithAdditionaConfigurationsFrom(configWithSection)
+            var result = builder.WithAdditionalConfigurationsFrom(configWithSection)
                                .Bind(b => b.Build());
 
             // Assert
@@ -895,7 +946,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         }
 
         [Fact]
-        public void WithAdditionaConfigurationsFrom_WithMultipleConfigurations_ShouldMergeAll()
+        public void WithAdditionalConfigurationsFrom_WithMultipleConfigurations_ShouldMergeAll()
         {
             // Arrange
             var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
@@ -913,7 +964,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
                 .Build();
 
             // Act
-            var result = builder.WithAdditionaConfigurationsFrom(config1, config2)
+            var result = builder.WithAdditionalConfigurationsFrom(config1, config2)
                                .Bind(b => b.Build());
 
             // Assert
@@ -923,7 +974,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         }
 
         [Fact]
-        public void WithAdditionaConfigurationsFrom_WithMissingConfigurationSection_ShouldSucceed()
+        public void WithAdditionalConfigurationsFrom_WithMissingConfigurationSection_ShouldSucceed()
         {
             // Arrange - The implementation actually returns null for missing configuration sections via ValueOrDefault
             // So it doesn't throw, it just returns an empty configuration
@@ -936,7 +987,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
                 .Build();
 
             // Act
-            var result = builder.WithAdditionaConfigurationsFrom(configWithoutSection)
+            var result = builder.WithAdditionalConfigurationsFrom(configWithoutSection)
                                .Bind(b => b.Build());
 
             // Assert - Should succeed because ValueOrDefault returns null which is handled gracefully
@@ -944,7 +995,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         }
 
         [Fact]
-        public void WithAdditionaConfigurationsFrom_WithNestedConfiguration_ShouldExtractCorrectly()
+        public void WithAdditionalConfigurationsFrom_WithNestedConfiguration_ShouldExtractCorrectly()
         {
             // Arrange
             var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
@@ -957,7 +1008,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
                 .Build();
 
             // Act
-            var result = builder.WithAdditionaConfigurationsFrom(config)
+            var result = builder.WithAdditionalConfigurationsFrom(config)
                                .Bind(b => b.Build());
 
             // Assert
@@ -967,7 +1018,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         }
 
         [Fact]
-        public void WithAdditionaConfigurationsFrom_CombinedWithOtherSources_ShouldMergeCorrectly()
+        public void WithAdditionalConfigurationsFrom_CombinedWithOtherSources_ShouldMergeCorrectly()
         {
             // Arrange
             var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
@@ -980,7 +1031,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
 
             // Act
             var result = builder.WithRawJsonStrings("{\"InternalKey\":\"InternalValue\"}")
-                               .Bind(b => b.WithAdditionaConfigurationsFrom(externalConfig))
+                               .Bind(b => b.WithAdditionalConfigurationsFrom(externalConfig))
                                .Bind(b => b.Build());
 
             // Assert
