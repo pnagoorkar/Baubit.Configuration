@@ -1,4 +1,5 @@
 ﻿using Baubit.Configuration.Traceability;
+using Microsoft.Extensions.Configuration;
 
 namespace Baubit.Configuration.Test.ConfigurationSourceBuilder
 {
@@ -546,6 +547,137 @@ namespace Baubit.Configuration.Test.ConfigurationSourceBuilder
             
             // The built configuration should have its own copy
             Assert.Single(result.Value.RawJsonStrings.Where(s => s == json));
+        }
+
+        #endregion
+
+        #region Constants Tests
+
+        [Fact]
+        public void ConfigurationSourceSectionKey_ShouldHaveExpectedValue()
+        {
+            // Act
+            var value = Configuration.ConfigurationSourceBuilder.ConfigurationSourceSectionKey;
+
+            // Assert
+            Assert.Equal("configurationSource", value);
+        }
+
+        [Fact]
+        public void ConfigurationSourceSectionKey_UsedInGetObjectConfigurationSourceSection_ShouldExtractCorrectSection()
+        {
+            // Arrange
+            var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { $"{Configuration.ConfigurationSourceBuilder.ConfigurationSourceSectionKey}:RawJsonStrings:0", "{\"Key\":\"Value\"}" }
+                })
+                .Build();
+
+            // Act
+            var section = config.GetSection(Configuration.ConfigurationSourceBuilder.ConfigurationSourceSectionKey);
+
+            // Assert
+            Assert.True(section.Exists());
+            Assert.Equal("{\"Key\":\"Value\"}", section["RawJsonStrings:0"]);
+        }
+
+        #endregion
+
+        #region WithAdditionalConfigurationSources Tests
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_WithSingleSource_ShouldMergeAll()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationSourceBuilder.CreateNew().Value;
+            var existingSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key\":\"Value\"}"))
+                .Bind(b => b.WithJsonUriStrings("file:///test.json"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(existingSource)
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Single(result.Value.RawJsonStrings);
+            Assert.Single(result.Value.JsonUriStrings);
+            Assert.Contains("{\"Key\":\"Value\"}", result.Value.RawJsonStrings);
+            Assert.Contains("file:///test.json", result.Value.JsonUriStrings);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_WithMultipleSources_ShouldMergeAll()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationSourceBuilder.CreateNew().Value;
+            var source1 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
+                .Bind(b => b.Build())
+                .Value;
+            var source2 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithJsonUriStrings("file:///test.json"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(source1, source2)
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Single(result.Value.RawJsonStrings);
+            Assert.Single(result.Value.JsonUriStrings);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_WithAllSourceTypes_ShouldMergeEverything()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationSourceBuilder.CreateNew().Value;
+            var existingSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key\":\"Value\"}"))
+                .Bind(b => b.WithJsonUriStrings("file:///test.json"))
+                .Bind(b => b.WithEmbeddedJsonResources("TestApp;Config.json"))
+                .Bind(b => b.WithLocalSecrets("TestSecret"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(existingSource)
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Single(result.Value.RawJsonStrings);
+            Assert.Single(result.Value.JsonUriStrings);
+            Assert.Single(result.Value.EmbeddedJsonResources);
+            Assert.Single(result.Value.LocalSecrets);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_CombinedWithOtherMethods_ShouldAccumulate()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationSourceBuilder.CreateNew().Value;
+            var existingSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithRawJsonStrings("{\"Key2\":\"Value2\"}")
+                               .Bind(b => b.WithAdditionalConfigurationSources(existingSource))
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(2, result.Value.RawJsonStrings.Count);
+            Assert.Contains("{\"Key1\":\"Value1\"}", result.Value.RawJsonStrings);
+            Assert.Contains("{\"Key2\":\"Value2\"}", result.Value.RawJsonStrings);
         }
 
         #endregion

@@ -776,5 +776,270 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         }
 
         #endregion
+
+        #region ConfigurationBuilder - Constants Tests
+
+        [Fact]
+        public void ConfigurationSectionKey_ShouldHaveExpectedValue()
+        {
+            // Act
+            var value = Configuration.ConfigurationBuilder.ConfigurationSectionKey;
+
+            // Assert
+            Assert.Equal("configuration", value);
+        }
+
+        [Fact]
+        public void ConfigurationSectionKey_UsedInGetSection_ShouldExtractCorrectSection()
+        {
+            // Arrange
+            var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { $"{Configuration.ConfigurationBuilder.ConfigurationSectionKey}:TestKey", "TestValue" }
+                })
+                .Build();
+
+            // Act
+            var section = config.GetSection(Configuration.ConfigurationBuilder.ConfigurationSectionKey);
+
+            // Assert
+            Assert.True(section.Exists());
+            Assert.Equal("TestValue", section["TestKey"]);
+        }
+
+        #endregion
+
+        #region ConfigurationBuilder - WithAdditionalConfigurationSources Tests
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_WithSingleSource_ShouldSucceed()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key\":\"Value\"}"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(configSource);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Same(builder, result.Value);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_WithMultipleSources_ShouldMergeAll()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var source1 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
+                .Bind(b => b.Build())
+                .Value;
+            var source2 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key2\":\"Value2\"}"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(source1, source2)
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("Value1", result.Value["Key1"]);
+            Assert.Equal("Value2", result.Value["Key2"]);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_CombinedWithOtherMethods_ShouldAccumulate()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"SourceKey\":\"SourceValue\"}"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithRawJsonStrings("{\"BuilderKey\":\"BuilderValue\"}")
+                               .Bind(b => b.WithAdditionalConfigurationSources(configSource))
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("BuilderValue", result.Value["BuilderKey"]);
+            Assert.Equal("SourceValue", result.Value["SourceKey"]);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_WithAllSourceTypes_ShouldMergeEverything()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"RawKey\":\"RawValue\"}"))
+                .Bind(b => b.WithJsonUriStrings("file:///test.json"))
+                .Bind(b => b.WithEmbeddedJsonResources("TestApp;Config.json"))
+                .Bind(b => b.WithLocalSecrets("TestSecret"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(configSource);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationSources_CalledMultipleTimes_ShouldAccumulate()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var source1 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
+                .Bind(b => b.Build())
+                .Value;
+            var source2 = Configuration.ConfigurationSourceBuilder.CreateNew()
+                .Bind(b => b.WithRawJsonStrings("{\"Key2\":\"Value2\"}"))
+                .Bind(b => b.Build())
+                .Value;
+
+            // Act
+            var result = builder.WithAdditionalConfigurationSources(source1)
+                               .Bind(b => b.WithAdditionalConfigurationSources(source2))
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("Value1", result.Value["Key1"]);
+            Assert.Equal("Value2", result.Value["Key2"]);
+        }
+
+        #endregion
+
+        #region ConfigurationBuilder - WithAdditionalConfigurationsFrom Tests
+
+        [Fact]
+        public void WithAdditionalConfigurationsFrom_WithValidConfiguration_ShouldSucceed()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configWithSection = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "configuration:TestKey", "TestValue" }
+                })
+                .Build();
+
+            // Act
+            var result = builder.WithAdditionalConfigurationsFrom(configWithSection)
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("TestValue", result.Value["TestKey"]);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationsFrom_WithMultipleConfigurations_ShouldMergeAll()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var config1 = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "configuration:Key1", "Value1" }
+                })
+                .Build();
+            var config2 = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "configuration:Key2", "Value2" }
+                })
+                .Build();
+
+            // Act
+            var result = builder.WithAdditionalConfigurationsFrom(config1, config2)
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("Value1", result.Value["Key1"]);
+            Assert.Equal("Value2", result.Value["Key2"]);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationsFrom_WithMissingConfigurationSection_ShouldSucceed()
+        {
+            // Arrange - The implementation actually returns null for missing configuration sections via ValueOrDefault
+            // So it doesn't throw, it just returns an empty configuration
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configWithoutSection = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "SomeOtherKey", "SomeValue" }
+                })
+                .Build();
+
+            // Act
+            var result = builder.WithAdditionalConfigurationsFrom(configWithoutSection)
+                               .Bind(b => b.Build());
+
+            // Assert - Should succeed because ValueOrDefault returns null which is handled gracefully
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationsFrom_WithNestedConfiguration_ShouldExtractCorrectly()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "configuration:Database:Host", "localhost" },
+                    { "configuration:Database:Port", "5432" }
+                })
+                .Build();
+
+            // Act
+            var result = builder.WithAdditionalConfigurationsFrom(config)
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("localhost", result.Value["Database:Host"]);
+            Assert.Equal("5432", result.Value["Database:Port"]);
+        }
+
+        [Fact]
+        public void WithAdditionalConfigurationsFrom_CombinedWithOtherSources_ShouldMergeCorrectly()
+        {
+            // Arrange
+            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var externalConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "configuration:ExternalKey", "ExternalValue" }
+                })
+                .Build();
+
+            // Act
+            var result = builder.WithRawJsonStrings("{\"InternalKey\":\"InternalValue\"}")
+                               .Bind(b => b.WithAdditionalConfigurationsFrom(externalConfig))
+                               .Bind(b => b.Build());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("InternalValue", result.Value["InternalKey"]);
+            Assert.Equal("ExternalValue", result.Value["ExternalKey"]);
+        }
+
+        #endregion
     }
 }

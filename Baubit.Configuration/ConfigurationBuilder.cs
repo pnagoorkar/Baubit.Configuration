@@ -38,6 +38,15 @@ namespace Baubit.Configuration
     /// </example>
     public class ConfigurationBuilder : IDisposable
     {
+        /// <summary>
+        /// The configuration section key used to identify configuration data within an <see cref="IConfiguration"/> instance.
+        /// This constant is used when extracting configuration sections via <see cref="WithAdditionalConfigurationsFrom"/>.
+        /// </summary>
+        /// <remarks>
+        /// When loading configurations from external sources, this key identifies the section containing
+        /// the actual configuration data to be merged. The value is "configuration".
+        /// </remarks>
+        public const string ConfigurationSectionKey = "configuration";
         private ConfigurationSourceBuilder _configurationSourceBuilder;
         private List<IConfiguration> additionalConfigs = new List<IConfiguration>();
         private bool _isDisposed;
@@ -241,6 +250,135 @@ namespace Baubit.Configuration
         }
 
         /// <summary>
+        /// Adds additional configuration sources extracted from existing <see cref="IConfiguration"/> instances.
+        /// Extracts the "configurationSource" section from each provided configuration and merges them.
+        /// </summary>
+        /// <param name="configurations">
+        /// An array of <see cref="IConfiguration"/> instances containing "configurationSource" sections to extract.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing the current builder instance for method chaining if successful;
+        /// otherwise, a failed result if extraction or merging fails.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This method extracts the "configurationSource" section from each provided configuration.
+        /// If the section does not exist or is not defined, it returns an empty configuration source.
+        /// </para>
+        /// <para>
+        /// The extracted sources are merged with existing sources in the builder.
+        /// This is useful for loading configuration sources from external configurations or configuration files.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var externalConfig = new ConfigurationBuilder()
+        ///     .AddInMemoryCollection(new Dictionary&lt;string, string&gt; 
+        ///     {
+        ///         { "configurationSource:RawJsonStrings:0", "{\"Key\":\"Value\"}" }
+        ///     })
+        ///     .Build();
+        /// 
+        /// var result = builder.WithAdditionalConfigurationSourcesFrom(externalConfig);
+        /// </code>
+        /// </example>
+        public Result<ConfigurationBuilder> WithAdditionalConfigurationSourcesFrom(params IConfiguration[] configurations)
+        {
+            return _configurationSourceBuilder.WithAdditionalConfigurationSourcesFrom(configurations).Bind(_ => Result.Ok(this));
+        }
+
+        /// <summary>
+        /// Adds pre-built <see cref="ConfigurationSource"/> instances to the builder by merging their sources.
+        /// This method directly adds configuration sources without extracting from <see cref="IConfiguration"/> instances.
+        /// </summary>
+        /// <param name="configurationSources">
+        /// An array of <see cref="ConfigurationSource"/> instances whose sources will be merged with the current builder.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing the current builder instance for method chaining if successful;
+        /// otherwise, a failed result with appropriate error information.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This method delegates to <see cref="ConfigurationSourceBuilder.WithAdditionalConfigurationSources"/>
+        /// to merge all source types (RawJsonStrings, JsonUriStrings, EmbeddedJsonResources, LocalSecrets)
+        /// from the provided configuration sources into the current builder.
+        /// </para>
+        /// <para>
+        /// This is useful when you have existing <see cref="ConfigurationSource"/> objects that you want to
+        /// compose together or reuse across multiple configuration builds.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var baseSource = ConfigurationSourceBuilder.CreateNew()
+        ///     .Bind(b => b.WithRawJsonStrings("{\"BaseKey\":\"BaseValue\"}"))
+        ///     .Bind(b => b.Build())
+        ///     .Value;
+        /// 
+        /// var result = ConfigurationBuilder.CreateNew()
+        ///     .Bind(b => b.WithAdditionalConfigurationSources(baseSource))
+        ///     .Bind(b => b.WithRawJsonStrings("{\"AdditionalKey\":\"AdditionalValue\"}"))
+        ///     .Bind(b => b.Build());
+        /// </code>
+        /// </example>
+        public Result<ConfigurationBuilder> WithAdditionalConfigurationSources(params ConfigurationSource[] configurationSources)
+        {
+            return _configurationSourceBuilder.WithAdditionalConfigurationSources(configurationSources).Bind(_ => Result.Ok(this));
+        }
+
+        /// <summary>
+        /// Adds additional configurations extracted from existing <see cref="IConfiguration"/> instances.
+        /// Extracts the "configuration" section from each provided configuration and merges them with the final configuration.
+        /// </summary>
+        /// <param name="configurations">
+        /// An array of <see cref="IConfiguration"/> instances containing "configuration" sections to extract.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing the current builder instance for method chaining if successful;
+        /// otherwise, a failed result if extraction fails.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This method extracts the "configuration" section from each provided configuration.
+        /// If the "configuration" section does not exist in a configuration, that configuration is skipped with a failure reason.
+        /// </para>
+        /// <para>
+        /// The extracted configurations are added as additional configurations to be merged with the final configuration.
+        /// This is useful for loading configuration data from external configurations or configuration files.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var externalConfig = new ConfigurationBuilder()
+        ///     .AddInMemoryCollection(new Dictionary&lt;string, string&gt; 
+        ///     {
+        ///         { "configuration:Database", "Server=localhost" }
+        ///     })
+        ///     .Build();
+        /// 
+        /// var result = builder.WithAdditionalConfigurationsFrom(externalConfig);
+        /// </code>
+        /// </example>
+        public Result<ConfigurationBuilder> WithAdditionalConfigurationsFrom(params IConfiguration[] configurations)
+        {
+            return WithAdditionalConfigurations(configurations.Select(configuration => GetObjectConfigurationOrDefault(configuration).ThrowIfFailed().Value).ToArray());
+        }
+
+        private static Result<IConfigurationSection> GetObjectConfigurationOrDefault(IConfiguration configuration)
+        {
+            return Result.Ok(GetObjectConfigurationSection(configuration).ValueOrDefault);
+        }
+
+        private static Result<IConfigurationSection> GetObjectConfigurationSection(IConfiguration configurationSection)
+        {
+            var objectConfigurationSection = configurationSection.GetSection(ConfigurationSectionKey);
+            return objectConfigurationSection.Exists() ?
+                   Result.Ok(objectConfigurationSection) :
+                   Result.Fail(Enumerable.Empty<IError>()).WithReason(new ConfigurationNotDefined());
+        }
+
+        /// <summary>
         /// Builds and returns an <see cref="IConfiguration"/> instance containing all the configuration sources added to this builder.
         /// The builder is automatically disposed after this method completes successfully.
         /// </summary>
@@ -375,6 +513,24 @@ namespace Baubit.Configuration
     public class ConfigurationBuilder<TConfiguration> : ConfigurationBuilder where TConfiguration : AConfiguration
     {
         private List<IValidator<TConfiguration>> validators = new List<IValidator<TConfiguration>>();
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ConfigurationBuilder{TConfiguration}"/>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing a new <see cref="ConfigurationBuilder{TConfiguration}"/> instance.
+        /// </returns>
+        /// <example>
+        /// <code>
+        /// var builderResult = ConfigurationBuilder&lt;MyConfiguration&gt;.CreateNew();
+        /// if (builderResult.IsSuccess)
+        /// {
+        ///     var builder = builderResult.Value;
+        ///     // Use the builder...
+        /// }
+        /// </code>
+        /// </example>
+        public static new Result<ConfigurationBuilder<TConfiguration>> CreateNew() => Result.Ok(new ConfigurationBuilder<TConfiguration>());
 
         /// <summary>
         /// Adds one or more validators to the validation pipeline for the configuration object.

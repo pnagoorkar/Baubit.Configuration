@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/SolutionItems/">
+    <File Path=".circleci/config.yml" />
+    <File Path=".github/copilot-instructions.md" />
+  </Folder>
   <Project Path="Baubit.Configuration.Test/Baubit.Configuration.Test.csproj" Id="aebb0ebd-3fda-45c0-8c61-1fe01d7af4fa" />
   <Project Path="Baubit.Configuration/Baubit.Configuration.csproj" />
 </Solution>
