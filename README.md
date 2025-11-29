@@ -120,8 +120,9 @@ var result = builder.Build();
 | Raw JSON | `WithRawJsonStrings("{...}")` | JSON strings |
 | User Secrets | `WithLocalSecrets("SecretId")` | Secret ID |
 | Additional Config | `WithAdditionalConfigurations(config)` | IConfiguration |
-| Configuration Sources | `WithAdditionaConfigurationSourcesFrom(config)` | IConfiguration with "configurationSource" section |
-| Configuration Data | `WithAdditionaConfigurationsFrom(config)` | IConfiguration with "configuration" section |
+| Configuration Sources | `WithAdditionalConfigurationSourcesFrom(config)` | IConfiguration with "configurationSource" section |
+| Configuration Data | `WithAdditionalConfigurationsFrom(config)` | IConfiguration with "configuration" section |
+| Pre-built Sources | `WithAdditionalConfigurationSources(sources)` | ConfigurationSource objects |
 
 ## Environment Variable Expansion
 
@@ -150,14 +151,18 @@ public class Config : AConfiguration
 // Factory
 ConfigurationBuilder.CreateNew() : Result<ConfigurationBuilder>
 
+// Constants
+ConfigurationSectionKey : string = "configuration"  // Section key for configuration data
+
 // Methods
 WithJsonUriStrings(params string[] uris) : Result<ConfigurationBuilder>
 WithEmbeddedJsonResources(params string[] resources) : Result<ConfigurationBuilder>
 WithLocalSecrets(params string[] secrets) : Result<ConfigurationBuilder>
 WithRawJsonStrings(params string[] json) : Result<ConfigurationBuilder>
 WithAdditionalConfigurations(params IConfiguration[] configs) : Result<ConfigurationBuilder>
-WithAdditionaConfigurationSourcesFrom(params IConfiguration[] configs) : Result<ConfigurationBuilder>
-WithAdditionaConfigurationsFrom(params IConfiguration[] configs) : Result<ConfigurationBuilder>
+WithAdditionalConfigurationSourcesFrom(params IConfiguration[] configs) : Result<ConfigurationBuilder>
+WithAdditionalConfigurationsFrom(params IConfiguration[] configs) : Result<ConfigurationBuilder>
+WithAdditionalConfigurationSources(params ConfigurationSource[] sources) : Result<ConfigurationBuilder>
 Build() : Result<IConfiguration>
 ```
 
@@ -167,6 +172,24 @@ Build() : Result<IConfiguration>
 // Inherits all ConfigurationBuilder methods plus:
 WithValidators(params IValidator<TConfiguration>[] validators) : Result<ConfigurationBuilder<TConfiguration>>
 Build() : Result<TConfiguration>  // Returns typed config
+```
+
+### ConfigurationSourceBuilder
+
+```csharp
+// Factory
+ConfigurationSourceBuilder.CreateNew() : Result<ConfigurationSourceBuilder>
+
+// Constants
+ConfigurationSourceSectionKey : string = "configurationSource"  // Section key for configuration sources
+
+// Methods
+WithRawJsonStrings(params string[] json) : Result<ConfigurationSourceBuilder>
+WithJsonUriStrings(params string[] uris) : Result<ConfigurationSourceBuilder>
+WithEmbeddedJsonResources(params string[] resources) : Result<ConfigurationSourceBuilder>
+WithLocalSecrets(params string[] secrets) : Result<ConfigurationSourceBuilder>
+WithAdditionalConfigurationSources(params ConfigurationSource[] sources) : Result<ConfigurationSourceBuilder>
+Build() : Result<ConfigurationSource>
 ```
 
 ## Error Handling
@@ -192,8 +215,8 @@ if (result.IsFailed)
 - Handle `Result` failures explicitly
 - Use `[URI]` attribute for environment-specific values
 - Avoid storing sensitive data in code
-- Use `WithAdditionaConfigurationSourcesFrom` to load configuration sources from external configurations
-- Use `WithAdditionaConfigurationsFrom` to load configuration data from external configurations
+- Use `WithAdditionalConfigurationSourcesFrom` to load configuration sources from external configurations
+- Use `WithAdditionalConfigurationsFrom` to load configuration data from external configurations
 
 ## Examples
 
@@ -246,8 +269,30 @@ var externalConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder
     .Build();
 
 var builder = ConfigurationBuilder.CreateNew();
-builder.WithAdditionaConfigurationSourcesFrom(externalConfig);
+builder.WithAdditionalConfigurationSourcesFrom(externalConfig);
 var result = builder.Build();
+```
+
+### Composing Configuration Sources
+
+```csharp
+// Create and reuse configuration sources
+var baseSource = ConfigurationSourceBuilder.CreateNew()
+    .Bind(b => b.WithRawJsonStrings("{\"BaseKey\":\"BaseValue\"}"))
+    .Bind(b => b.Build())
+    .Value;
+
+var builder = ConfigurationBuilder.CreateNew();
+builder.WithAdditionalConfigurationSources(baseSource);
+builder.WithRawJsonStrings("{\"AdditionalKey\":\"AdditionalValue\"}");
+var result = builder.Build();
+
+if (result.IsSuccess)
+{
+    var config = result.Value;
+    var baseValue = config["BaseKey"];           // "BaseValue"
+    var additionalValue = config["AdditionalKey"]; // "AdditionalValue"
+}
 ```
 
 ### Loading Configuration Data from External Sources
@@ -262,7 +307,7 @@ var externalConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder
     .Build();
 
 var builder = ConfigurationBuilder.CreateNew();
-builder.WithAdditionaConfigurationsFrom(externalConfig);
+builder.WithAdditionalConfigurationsFrom(externalConfig);
 var result = builder.Build();
 
 if (result.IsSuccess)

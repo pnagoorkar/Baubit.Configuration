@@ -18,6 +18,14 @@ namespace Baubit.Configuration
     /// </remarks>
     public sealed class ConfigurationSourceBuilder : IDisposable
     {
+        /// <summary>
+        /// The configuration source section key used to identify configuration source metadata within an <see cref="IConfiguration"/> instance.
+        /// This constant is used when extracting configuration sources via <see cref="WithAdditionalConfigurationSourcesFrom"/>.
+        /// </summary>
+        /// <remarks>
+        /// When loading configuration sources from external sources, this key identifies the section containing
+        /// the source definitions (RawJsonStrings, JsonUriStrings, EmbeddedJsonResources, LocalSecrets). The value is "configurationSource".
+        /// </remarks>
         public const string ConfigurationSourceSectionKey = "configurationSource";
         private List<string> RawJsonStrings { get; set; } = new List<string>();
         private List<string> JsonUriStrings { get; set; } = new List<string>();
@@ -219,10 +227,10 @@ namespace Baubit.Configuration
         ///     })
         ///     .Build();
         /// 
-        /// var result = builder.WithAdditionaConfigurationSourcesFrom(externalConfig);
+        /// var result = builder.WithAdditionalConfigurationSourcesFrom(externalConfig);
         /// </code>
         /// </example>
-        public Result<ConfigurationSourceBuilder> WithAdditionaConfigurationSourcesFrom(params IConfiguration[] configurations)
+        public Result<ConfigurationSourceBuilder> WithAdditionalConfigurationSourcesFrom(params IConfiguration[] configurations)
         {
             return WithAdditionalConfigurationSources(configurations.Select(configuration => GetObjectConfigurationSourceOrDefault(configuration).ThrowIfFailed().Value).ToArray());
         }
