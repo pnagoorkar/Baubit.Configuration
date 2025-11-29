@@ -1,6 +1,7 @@
 ﻿using Baubit.Configuration.Traceability;
 using Baubit.Traceability;
 using FluentResults;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -132,6 +133,110 @@ namespace Baubit.Configuration
                          .AddReasonIfFailed(new ConfigurationBuilderDisposed())
                          .Bind(() => Result.Try(() => RawJsonStrings.AddRange(rawJsonStrings)))
                          .Bind(() => Result.Ok(this));
+        }
+
+        /// <summary>
+        /// Adds additional configuration sources by merging them with the current builder.
+        /// This method combines all configuration sources from the provided <see cref="ConfigurationSource"/> instances.
+        /// </summary>
+        /// <param name="configSources">
+        /// An array of <see cref="ConfigurationSource"/> instances whose sources will be merged with the current builder.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing the current builder instance for method chaining if successful;
+        /// otherwise, a failed result with appropriate error information.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This method extracts all source types (RawJsonStrings, JsonUriStrings, EmbeddedJsonResources, LocalSecrets)
+        /// from the provided configuration sources and adds them to the current builder.
+        /// </para>
+        /// <para>
+        /// Sources are accumulated in the order they are provided.
+        /// This is useful for composing configuration sources from multiple existing sources.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var existingSource = ConfigurationSourceBuilder.CreateNew()
+        ///     .Bind(b => b.WithRawJsonStrings("{\"Key\":\"Value\"}"))
+        ///     .Bind(b => b.Build())
+        ///     .Value;
+        /// 
+        /// var result = builder.WithAdditionalConfigurationSources(existingSource);
+        /// </code>
+        /// </example>
+        public Result<ConfigurationSourceBuilder> WithAdditionalConfigurationSources(params ConfigurationSource[] configSources)
+        {
+            var rawJsonStrings = new List<string>();
+            var jsonUriStrings = new List<string>();
+            var embeddedJsonResources = new List<string>();
+            var localSecrets = new List<string>();
+            return Result.Try(() =>
+            {
+                foreach (var configSource in configSources)
+                {
+                    rawJsonStrings.AddRange(configSource.RawJsonStrings);
+                    jsonUriStrings.AddRange(configSource.JsonUriStrings);
+                    embeddedJsonResources.AddRange(configSource.EmbeddedJsonResources);
+                    localSecrets.AddRange(configSource.LocalSecrets);
+                }
+            }).Bind(() => WithRawJsonStrings(rawJsonStrings.ToArray()))
+              .Bind(_ => WithJsonUriStrings(jsonUriStrings.ToArray()))
+              .Bind(_ => WithEmbeddedJsonResources(embeddedJsonResources.ToArray()))
+              .Bind(_ => WithLocalSecrets(localSecrets.ToArray()));
+        }
+
+        /// <summary>
+        /// Adds additional configuration sources extracted from existing <see cref="IConfiguration"/> instances.
+        /// Extracts the "configurationSource" section from each provided configuration and merges them.
+        /// </summary>
+        /// <param name="configurations">
+        /// An array of <see cref="IConfiguration"/> instances containing "configurationSource" sections to extract.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Result{T}"/> containing the current builder instance for method chaining if successful;
+        /// otherwise, a failed result if extraction or merging fails.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// This method extracts the "configurationSource" section from each provided configuration
+        /// and binds it to a <see cref="ConfigurationSource"/> object.
+        /// If the section does not exist or cannot be bound, an empty configuration source is used.
+        /// </para>
+        /// <para>
+        /// The extracted sources are then merged using <see cref="WithAdditionalConfigurationSources"/>.
+        /// This is useful for loading configuration sources from external configurations or configuration files.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var externalConfig = new ConfigurationBuilder()
+        ///     .AddInMemoryCollection(new Dictionary&lt;string, string&gt; 
+        ///     {
+        ///         { "configurationSource:RawJsonStrings:0", "{\"Key\":\"Value\"}" }
+        ///     })
+        ///     .Build();
+        /// 
+        /// var result = builder.WithAdditionaConfigurationSourcesFrom(externalConfig);
+        /// </code>
+        /// </example>
+        public Result<ConfigurationSourceBuilder> WithAdditionaConfigurationSourcesFrom(params IConfiguration[] configurations)
+        {
+            return WithAdditionalConfigurationSources(configurations.Select(configuration => GetObjectConfigurationSourceOrDefault(configuration).ThrowIfFailed().Value).ToArray());
+        }
+
+        private static Result<ConfigurationSource> GetObjectConfigurationSourceOrDefault(IConfiguration configuration)
+        {
+            return Result.Ok(GetObjectConfigurationSourceSection(configuration).ValueOrDefault?.Get<ConfigurationSource>() ?? BuildEmpty().Value);
+        }
+
+        private static Result<IConfigurationSection> GetObjectConfigurationSourceSection(IConfiguration configurationSection)
+        {
+            var objectConfigurationSourceSection = configurationSection.GetSection("configurationSource");
+            return objectConfigurationSourceSection.Exists() ?
+                   Result.Ok(objectConfigurationSourceSection) :
+                   Result.Fail(Enumerable.Empty<IError>()).WithReason(new ConfigurationSourceNotDefined());
         }
 
         /// <summary>
