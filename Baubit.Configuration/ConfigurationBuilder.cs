@@ -472,7 +472,7 @@ namespace Baubit.Configuration
     /// Extends <see cref="ConfigurationBuilder"/> to add configuration binding, URI expansion, and validation capabilities.
     /// </summary>
     /// <typeparam name="TConfiguration">
-    /// The strongly-typed configuration class that inherits from <see cref="AConfiguration"/>.
+    /// The strongly-typed configuration class that inherits from <see cref="Configuration"/>.
     /// This type will be populated with values from the configuration sources.
     /// </typeparam>
     /// <remarks>
@@ -492,7 +492,7 @@ namespace Baubit.Configuration
     /// </remarks>
     /// <example>
     /// <code>
-    /// public record MyConfig : AConfiguration
+    /// public record MyConfig : Configuration
     /// {
     ///     public string DatabaseConnection { get; set; }
     ///     public int MaxRetries { get; set; }
@@ -510,7 +510,7 @@ namespace Baubit.Configuration
     /// }
     /// </code>
     /// </example>
-    public class ConfigurationBuilder<TConfiguration> : ConfigurationBuilder where TConfiguration : AConfiguration
+    public class ConfigurationBuilder<TConfiguration> : ConfigurationBuilder where TConfiguration : Configuration
     {
         private List<IValidator<TConfiguration>> validators = new List<IValidator<TConfiguration>>();
 
@@ -592,7 +592,7 @@ namespace Baubit.Configuration
         /// </remarks>
         /// <example>
         /// <code>
-        /// public record AppConfig : AConfiguration
+        /// public record AppConfig : Configuration
         /// {
         ///     [URI]
         ///     public string LogPath { get; set; } // e.g., "${HOME}/logs"

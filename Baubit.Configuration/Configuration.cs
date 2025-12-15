@@ -1,6 +1,6 @@
 ﻿namespace Baubit.Configuration
 {
-    public abstract class AConfiguration
+    public abstract class Configuration
     {
 
     }

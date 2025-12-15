@@ -746,7 +746,7 @@ namespace Baubit.Configuration.Test.ConfigurationSourceExtensions
         public void Build_WithSpecialCharactersInJson_ShouldPreserve()
         {
             // Arrange
-            var jsonWithSpecialChars = "{\"Key\":\"Value with ???? and émojis ??\"}";
+            var jsonWithSpecialChars = "{\"Key\":\"Value with ???? and ï¿½mojis ??\"}";
             var configSource = new ConfigSource(
                 new List<string> { jsonWithSpecialChars },
                 new List<string>(),
@@ -759,7 +759,7 @@ namespace Baubit.Configuration.Test.ConfigurationSourceExtensions
 
             // Assert
             Assert.True(result.IsSuccess);
-            Assert.Equal("Value with ???? and émojis ??", result.Value["Key"]);
+            Assert.Equal("Value with ???? and ï¿½mojis ??", result.Value["Key"]);
         }
 
         [Fact]
