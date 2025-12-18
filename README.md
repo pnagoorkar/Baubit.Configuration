@@ -46,7 +46,7 @@ if (result.IsSuccess)
 ### Type-Safe Configuration
 
 ```csharp
-public class AppConfig : AConfiguration
+public class AppConfig : Configuration
 {
     public string ConnectionString { get; init; }
     public int MaxRetries { get; init; }
@@ -66,7 +66,7 @@ if (result.IsSuccess)
 ### Environment Variable Expansion
 
 ```csharp
-public class PathConfig : AConfiguration
+public class PathConfig : Configuration
 {
     [URI]
     public string LogPath { get; init; }
@@ -95,7 +95,7 @@ var result = ConfigurationBuilder.CreateNew()
 ```csharp
 using Baubit.Configuration.Validation;
 
-public class AppConfigValidator : AValidator<AppConfig>
+public class AppConfigValidator : Validator<AppConfig>
 {
     public override Result Run(AppConfig config)
     {
@@ -130,7 +130,7 @@ var result = builder.Build();
 Properties marked with `[URI]` attribute support automatic environment variable expansion using `${VAR}` syntax:
 
 ```csharp
-public class Config : AConfiguration
+public class Config : Configuration
 {
     [URI]
     public string DatabasePath { get; init; }  // Expands ${DB_PATH}
@@ -211,7 +211,7 @@ if (result.IsFailed)
 
 ## Best Practices
 
-- Use typed configuration classes inheriting `AConfiguration`
+- Use typed configuration classes inheriting `Configuration`
 - Validate configuration with `IValidator<T>`
 - Handle `Result` failures explicitly
 - Use `[URI]` attribute for environment-specific values
@@ -224,7 +224,7 @@ if (result.IsFailed)
 ### Production Configuration
 
 ```csharp
-public class ProductionConfig : AConfiguration
+public class ProductionConfig : Configuration
 {
     [URI]
     public string DatabaseConnection { get; init; }
