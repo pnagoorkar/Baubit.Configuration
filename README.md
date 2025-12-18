@@ -4,8 +4,9 @@
 [![CircleCI](https://dl.circleci.com/status-badge/img/circleci/TpM4QUH8Djox7cjDaNpup5/2zTgJzKbD2m3nXCf5LKvqS/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/TpM4QUH8Djox7cjDaNpup5/2zTgJzKbD2m3nXCf5LKvqS/tree/master)
 [![codecov](https://codecov.io/gh/pnagoorkar/Baubit.Configuration/branch/master/graph/badge.svg)](https://codecov.io/gh/pnagoorkar/Baubit.Configuration)<br/>
 [![NuGet](https://img.shields.io/nuget/v/Baubit.Configuration.svg)](https://www.nuget.org/packages/Baubit.Configuration/)
-![.NET Standard 2.0](https://img.shields.io/badge/.NET%20Standard-2.0-512BD4?logo=dotnet&logoColor=white)<br/>
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![NuGet](https://img.shields.io/nuget/dt/Baubit.Configuration.svg)](https://www.nuget.org/packages/Baubit.Configuration) <br/>
+![.NET Standard 2.0](https://img.shields.io/badge/.NET%20Standard-2.0-512BD4?logo=dotnet&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)<br/>
 [![Known Vulnerabilities](https://snyk.io/test/github/pnagoorkar/Baubit.Configuration/badge.svg)](https://snyk.io/test/github/pnagoorkar/Baubit.Configuration)
 
 Type-safe configuration builder for .NET with Result pattern error handling and environment variable expansion.
@@ -45,7 +46,7 @@ if (result.IsSuccess)
 ### Type-Safe Configuration
 
 ```csharp
-public class AppConfig : AConfiguration
+public class AppConfig : Configuration
 {
     public string ConnectionString { get; init; }
     public int MaxRetries { get; init; }
@@ -65,7 +66,7 @@ if (result.IsSuccess)
 ### Environment Variable Expansion
 
 ```csharp
-public class PathConfig : AConfiguration
+public class PathConfig : Configuration
 {
     [URI]
     public string LogPath { get; init; }
@@ -94,7 +95,7 @@ var result = ConfigurationBuilder.CreateNew()
 ```csharp
 using Baubit.Configuration.Validation;
 
-public class AppConfigValidator : AValidator<AppConfig>
+public class AppConfigValidator : Validator<AppConfig>
 {
     public override Result Run(AppConfig config)
     {
@@ -129,7 +130,7 @@ var result = builder.Build();
 Properties marked with `[URI]` attribute support automatic environment variable expansion using `${VAR}` syntax:
 
 ```csharp
-public class Config : AConfiguration
+public class Config : Configuration
 {
     [URI]
     public string DatabasePath { get; init; }  // Expands ${DB_PATH}
@@ -210,7 +211,7 @@ if (result.IsFailed)
 
 ## Best Practices
 
-- Use typed configuration classes inheriting `AConfiguration`
+- Use typed configuration classes inheriting `Configuration`
 - Validate configuration with `IValidator<T>`
 - Handle `Result` failures explicitly
 - Use `[URI]` attribute for environment-specific values
@@ -223,7 +224,7 @@ if (result.IsFailed)
 ### Production Configuration
 
 ```csharp
-public class ProductionConfig : AConfiguration
+public class ProductionConfig : Configuration
 {
     [URI]
     public string DatabaseConnection { get; init; }

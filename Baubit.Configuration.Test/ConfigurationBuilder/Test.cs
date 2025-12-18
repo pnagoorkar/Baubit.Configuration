@@ -8,7 +8,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
     #region Test Helpers
 
     // Test configuration class
-    public class TestConfiguration : AConfiguration
+    public class TestConfiguration : global::Baubit.Configuration.Configuration
     {
         public string? TestValue { get; set; }
         public int TestNumber { get; set; }
@@ -60,7 +60,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void CreateNew_ShouldReturnSuccessResult()
         {
             // Act
-            var result = Configuration.ConfigurationBuilder.CreateNew();
+            var result = global::Baubit.Configuration.ConfigurationBuilder.CreateNew();
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -71,8 +71,8 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void CreateNew_ShouldReturnNewInstance()
         {
             // Act
-            var result1 = Configuration.ConfigurationBuilder.CreateNew();
-            var result2 = Configuration.ConfigurationBuilder.CreateNew();
+            var result1 = global::Baubit.Configuration.ConfigurationBuilder.CreateNew();
+            var result2 = global::Baubit.Configuration.ConfigurationBuilder.CreateNew();
 
             // Assert
             Assert.NotSame(result1.Value, result2.Value);
@@ -86,7 +86,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithRawJsonStrings_ShouldAddSingleJsonString()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var jsonString = "{\"TestValue\":\"value\"}";
 
             // Act
@@ -101,7 +101,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithRawJsonStrings_ShouldAddMultipleJsonStrings()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var json1 = "{\"Key1\":\"value1\"}";
             var json2 = "{\"Key2\":\"value2\"}";
 
@@ -117,7 +117,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithRawJsonStrings_CalledMultipleTimes_ShouldAccumulate()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var json1 = "{\"Key1\":\"value1\"}";
             var json2 = "{\"Key2\":\"value2\"}";
 
@@ -133,7 +133,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithRawJsonStrings_AfterDispose_ShouldFail()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             builder.Dispose();
 
             // Act
@@ -152,7 +152,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithJsonUriStrings_ShouldAddSingleUri()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var uri = "https://example.com/config.json";
 
             // Act
@@ -167,7 +167,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithJsonUriStrings_ShouldAddMultipleUris()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var uri1 = "https://example.com/config1.json";
             var uri2 = "https://example.com/config2.json";
 
@@ -182,7 +182,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithJsonUriStrings_AfterDispose_ShouldFail()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             builder.Dispose();
 
             // Act
@@ -201,7 +201,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithEmbeddedJsonResources_ShouldAddSingleResource()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var resource = "MyApp;Config.appsettings.json";
 
             // Act
@@ -216,7 +216,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithEmbeddedJsonResources_ShouldAddMultipleResources()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var resource1 = "MyApp;Config.appsettings.json";
             var resource2 = "MyApp;Config.appsettings.dev.json";
 
@@ -231,7 +231,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithEmbeddedJsonResources_AfterDispose_ShouldFail()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             builder.Dispose();
 
             // Act
@@ -250,7 +250,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithLocalSecrets_ShouldAddSingleSecret()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var secret = "MyApp.Secrets";
 
             // Act
@@ -265,7 +265,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithLocalSecrets_ShouldAddMultipleSecrets()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var secret1 = "MyApp.Secrets.Dev";
             var secret2 = "MyApp.Secrets.Prod";
 
@@ -280,7 +280,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithLocalSecrets_AfterDispose_ShouldFail()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             builder.Dispose();
 
             // Act
@@ -299,7 +299,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurations_ShouldAcceptSingleConfiguration()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
 
             // Act
@@ -314,7 +314,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurations_ShouldAcceptMultipleConfigurations()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var config1 = new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
             var config2 = new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
 
@@ -329,7 +329,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurations_CalledMultipleTimes_ShouldAccumulate()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var config1 = new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
             var config2 = new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
 
@@ -349,7 +349,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Build_WithEmptyBuilder_ShouldSucceed()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
 
             // Act
             var result = builder.Build();
@@ -363,7 +363,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Build_WithRawJsonStrings_ShouldCreateConfiguration()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var json = "{\"TestKey\":\"TestValue\"}";
 
             // Act
@@ -380,7 +380,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Build_WithMultipleJsonStrings_ShouldMergeConfiguration()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var json1 = "{\"Key1\":\"Value1\"}";
             var json2 = "{\"Key2\":\"Value2\"}";
 
@@ -398,7 +398,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Build_AfterDispose_ShouldFail()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             builder.Dispose();
 
             // Act & Assert
@@ -411,7 +411,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Build_ShouldDisposeBuilderAutomatically()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
 
             // Act
             var buildResult = builder.Build();
@@ -428,7 +428,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Build_WithAdditionalConfiguration_ShouldMergeConfigurations()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var additionalConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -455,7 +455,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Dispose_ShouldAllowMultipleCalls()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
 
             // Act & Assert (should not throw)
             builder.Dispose();
@@ -467,7 +467,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Dispose_ShouldPreventAllOperations()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             builder.Dispose();
 
             // Act
@@ -494,7 +494,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void FluentBuilder_ShouldWorkWithMethodChaining()
         {
             // Arrange & Act
-            var result = Configuration.ConfigurationBuilder.CreateNew()
+            var result = global::Baubit.Configuration.ConfigurationBuilder.CreateNew()
                 .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
                 .Bind(b => b.Build());
 
@@ -507,7 +507,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Builder_WithEmptyParameters_ShouldSucceed()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
 
             // Act
             var result = builder.WithRawJsonStrings()
@@ -528,7 +528,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_WithValidators_ShouldAddSingleValidator()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var validator = new PassingValidator();
 
             // Act
@@ -542,7 +542,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_WithValidators_ShouldAddMultipleValidators()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var validator1 = new PassingValidator();
             var validator2 = new PassingValidator();
 
@@ -557,7 +557,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_WithValidators_CalledMultipleTimes_ShouldAccumulate()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var validator1 = new PassingValidator();
             var validator2 = new PassingValidator();
 
@@ -577,7 +577,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_Build_WithEmptyConfiguration_ShouldCreateDefaultInstance()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
 
             // Act
             var result = builder.Build();
@@ -592,12 +592,12 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_Build_WithJsonConfiguration_ShouldPopulateProperties()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var json = "{\"TestValue\":\"TestData\",\"TestNumber\":42}";
 
             // Act
             var result = builder.WithRawJsonStrings(json)
-                               .Bind(b => ((Configuration.ConfigurationBuilder<TestConfiguration>)b).Build());
+                               .Bind(b => ((global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>)b).Build());
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -609,13 +609,13 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_Build_WithPassingValidator_ShouldSucceed()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var validator = new PassingValidator();
             var json = "{\"TestValue\":\"TestData\"}";
 
             // Act
             var result = builder.WithRawJsonStrings(json)
-                               .Bind(b => ((Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator))
+                               .Bind(b => ((global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator))
                                .Bind(b => b.Build());
 
             // Assert
@@ -626,13 +626,13 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_Build_WithFailingValidator_ShouldFail()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var validator = new FailingValidator();
             var json = "{\"TestValue\":\"TestData\"}";
 
             // Act
             var result = builder.WithRawJsonStrings(json)
-                               .Bind(b => ((Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator))
+                               .Bind(b => ((global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator))
                                .Bind(b => b.Build());
 
             // Assert
@@ -644,7 +644,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_Build_WithMultipleValidators_ShouldRunAllValidators()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var validator1 = new ConditionalValidator(
                 cfg => cfg.TestValue == "ValidValue",
                 "TestValue must be 'ValidValue'"
@@ -657,7 +657,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
 
             // Act
             var result = builder.WithRawJsonStrings(json)
-                               .Bind(b => ((Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator1, validator2))
+                               .Bind(b => ((global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator1, validator2))
                                .Bind(b => b.Build());
 
             // Assert
@@ -668,7 +668,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_Build_WithMultipleValidators_FirstFails_ShouldFail()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var validator1 = new ConditionalValidator(
                 cfg => cfg.TestValue == "ValidValue",
                 "TestValue must be 'ValidValue'"
@@ -678,7 +678,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
 
             // Act
             var result = builder.WithRawJsonStrings(json)
-                               .Bind(b => ((Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator1, validator2))
+                               .Bind(b => ((global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator1, validator2))
                                .Bind(b => b.Build());
 
             // Assert
@@ -690,7 +690,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_Build_InheritsBaseBuilderMethods()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
             var json = "{\"TestValue\":\"InheritedTest\"}";
 
             // Act
@@ -706,7 +706,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void Generic_Build_ShouldDisposeBuilderAutomatically()
         {
             // Arrange
-            var builder = new Configuration.ConfigurationBuilder<TestConfiguration>();
+            var builder = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>();
 
             // Act
             var buildResult = builder.Build();
@@ -733,9 +733,9 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
             var json = "{\"TestValue\":\"FluentTest\",\"TestNumber\":99}";
 
             // Act
-            var result = new Configuration.ConfigurationBuilder<TestConfiguration>()
+            var result = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>()
                 .WithRawJsonStrings(json)
-                .Bind(b => ((Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator))
+                .Bind(b => ((global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator))
                 .Bind(b => b.Build());
 
             // Assert
@@ -763,10 +763,10 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
             var json = "{\"TestValue\":\"ComplexTest\"}";
 
             // Act
-            var result = new Configuration.ConfigurationBuilder<TestConfiguration>()
+            var result = new global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>()
                 .WithRawJsonStrings(json)
                 .Bind(b => b.WithAdditionalConfigurations(additionalConfig))
-                .Bind(b => ((Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator))
+                .Bind(b => ((global::Baubit.Configuration.ConfigurationBuilder<TestConfiguration>)b).WithValidators(validator))
                 .Bind(b => b.Build());
 
             // Assert
@@ -783,7 +783,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void ConfigurationSectionKey_ShouldHaveExpectedValue()
         {
             // Act
-            var value = Configuration.ConfigurationBuilder.ConfigurationSectionKey;
+            var value = global::Baubit.Configuration.ConfigurationBuilder.ConfigurationSectionKey;
 
             // Assert
             Assert.Equal("configuration", value);
@@ -796,12 +796,12 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
             var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    { $"{Configuration.ConfigurationBuilder.ConfigurationSectionKey}:TestKey", "TestValue" }
+                    { global::Baubit.Configuration.ConfigurationBuilder.ConfigurationSectionKey + ":TestKey", "TestValue" }
                 })
                 .Build();
 
             // Act
-            var section = config.GetSection(Configuration.ConfigurationBuilder.ConfigurationSectionKey);
+            var section = config.GetSection(global::Baubit.Configuration.ConfigurationBuilder.ConfigurationSectionKey);
 
             // Assert
             Assert.True(section.Exists());
@@ -816,8 +816,8 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationSources_WithSingleSource_ShouldSucceed()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configSource = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .Bind(b => b.WithRawJsonStrings("{\"Key\":\"Value\"}"))
                 .Bind(b => b.Build())
                 .Value;
@@ -834,12 +834,12 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationSources_WithMultipleSources_ShouldMergeAll()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var source1 = Configuration.ConfigurationSourceBuilder.CreateNew()
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
+            var source1 = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
                 .Bind(b => b.Build())
                 .Value;
-            var source2 = Configuration.ConfigurationSourceBuilder.CreateNew()
+            var source2 = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .Bind(b => b.WithRawJsonStrings("{\"Key2\":\"Value2\"}"))
                 .Bind(b => b.Build())
                 .Value;
@@ -858,8 +858,8 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationSources_CombinedWithOtherMethods_ShouldAccumulate()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configSource = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .Bind(b => b.WithRawJsonStrings("{\"SourceKey\":\"SourceValue\"}"))
                 .Bind(b => b.Build())
                 .Value;
@@ -879,8 +879,8 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationSources_WithAllSourceTypes_ShouldMergeEverything()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var configSource = Configuration.ConfigurationSourceBuilder.CreateNew()
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
+            var configSource = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .Bind(b => b.WithRawJsonStrings("{\"RawKey\":\"RawValue\"}"))
                 .Bind(b => b.WithJsonUriStrings("file:///test.json"))
                 .Bind(b => b.WithEmbeddedJsonResources("TestApp;Config.json"))
@@ -899,12 +899,12 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationSources_CalledMultipleTimes_ShouldAccumulate()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
-            var source1 = Configuration.ConfigurationSourceBuilder.CreateNew()
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
+            var source1 = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .Bind(b => b.WithRawJsonStrings("{\"Key1\":\"Value1\"}"))
                 .Bind(b => b.Build())
                 .Value;
-            var source2 = Configuration.ConfigurationSourceBuilder.CreateNew()
+            var source2 = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .Bind(b => b.WithRawJsonStrings("{\"Key2\":\"Value2\"}"))
                 .Bind(b => b.Build())
                 .Value;
@@ -928,7 +928,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationsFrom_WithValidConfiguration_ShouldSucceed()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var configWithSection = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -949,7 +949,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationsFrom_WithMultipleConfigurations_ShouldMergeAll()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var config1 = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -978,7 +978,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         {
             // Arrange - The implementation actually returns null for missing configuration sections via ValueOrDefault
             // So it doesn't throw, it just returns an empty configuration
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var configWithoutSection = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -998,7 +998,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationsFrom_WithNestedConfiguration_ShouldExtractCorrectly()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -1021,7 +1021,7 @@ namespace Baubit.Configuration.Test.ConfigurationBuilder
         public void WithAdditionalConfigurationsFrom_CombinedWithOtherSources_ShouldMergeCorrectly()
         {
             // Arrange
-            var builder = Configuration.ConfigurationBuilder.CreateNew().Value;
+            var builder = global::Baubit.Configuration.ConfigurationBuilder.CreateNew().Value;
             var externalConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
