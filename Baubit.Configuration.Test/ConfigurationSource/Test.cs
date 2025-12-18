@@ -14,7 +14,7 @@
             var localSecrets = new List<string> { "MyApp.Secrets" };
 
             // Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 rawJsonStrings,
                 jsonUriStrings,
                 embeddedJsonResources,
@@ -40,7 +40,7 @@
         public void Constructor_WithNullRawJsonStrings_ShouldInitializeEmptyList()
         {
             // Arrange & Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 null,
                 new List<string>(),
                 new List<string>(),
@@ -56,7 +56,7 @@
         public void Constructor_WithNullJsonUriStrings_ShouldInitializeEmptyList()
         {
             // Arrange & Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 new List<string>(),
                 null,
                 new List<string>(),
@@ -72,7 +72,7 @@
         public void Constructor_WithNullEmbeddedJsonResources_ShouldInitializeEmptyList()
         {
             // Arrange & Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 new List<string>(),
                 new List<string>(),
                 null,
@@ -88,7 +88,7 @@
         public void Constructor_WithNullLocalSecrets_ShouldInitializeEmptyList()
         {
             // Arrange & Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 new List<string>(),
                 new List<string>(),
                 new List<string>(),
@@ -104,7 +104,7 @@
         public void Constructor_WithAllNullParameters_ShouldInitializeAllEmptyLists()
         {
             // Arrange & Act
-            var configSource = new Configuration.ConfigurationSource(null, null, null, null);
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(null, null, null, null);
 
             // Assert
             Assert.NotNull(configSource.RawJsonStrings);
@@ -121,7 +121,7 @@
         public void DefaultConstructor_ShouldInitializeAllEmptyLists()
         {
             // Arrange & Act
-            var configSource = new Configuration.ConfigurationSource();
+            var configSource = new global::Baubit.Configuration.ConfigurationSource();
 
             // Assert
             Assert.NotNull(configSource.RawJsonStrings);
@@ -142,7 +142,7 @@
         public void Empty_ShouldReturnConfigurationSourceWithEmptyLists()
         {
             // Act
-            var emptySource = Configuration.ConfigurationSource.Empty;
+            var emptySource = global::Baubit.Configuration.ConfigurationSource.Empty;
 
             // Assert
             Assert.NotNull(emptySource);
@@ -160,8 +160,8 @@
         public void Empty_ShouldReturnNewInstanceEachTime()
         {
             // Act
-            var empty1 = Configuration.ConfigurationSource.Empty;
-            var empty2 = Configuration.ConfigurationSource.Empty;
+            var empty1 = global::Baubit.Configuration.ConfigurationSource.Empty;
+            var empty2 = global::Baubit.Configuration.ConfigurationSource.Empty;
 
             // Assert
             Assert.NotSame(empty1, empty2);
@@ -182,7 +182,7 @@
 
             // Act
 
-            var configSource = new Configuration.ConfigurationSource(rawJsonStrings, jsonUriStrings, embeddedJsonResources, localSecrets);
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(rawJsonStrings, jsonUriStrings, embeddedJsonResources, localSecrets);
 
             // Assert
             Assert.Same(rawJsonStrings, configSource.RawJsonStrings);
@@ -199,8 +199,8 @@
         public void JsonUriStrings_ShouldHaveURIAttribute()
         {
             // Arrange
-            var propertyInfo = typeof(Configuration.ConfigurationSource)
-                .GetProperty(nameof(Configuration.ConfigurationSource.JsonUriStrings));
+            var propertyInfo = typeof(global::Baubit.Configuration.ConfigurationSource)
+                .GetProperty(nameof(global::Baubit.Configuration.ConfigurationSource.JsonUriStrings));
 
             // Act
             var hasUriAttribute = propertyInfo?.GetCustomAttributes(typeof(URIAttribute), false).Length > 0;
@@ -213,8 +213,8 @@
         public void EmbeddedJsonResources_ShouldHaveURIAttribute()
         {
             // Arrange
-            var propertyInfo = typeof(Configuration.ConfigurationSource)
-                .GetProperty(nameof(Configuration.ConfigurationSource.EmbeddedJsonResources));
+            var propertyInfo = typeof(global::Baubit.Configuration.ConfigurationSource)
+                .GetProperty(nameof(global::Baubit.Configuration.ConfigurationSource.EmbeddedJsonResources));
 
             // Act
             var hasUriAttribute = propertyInfo?.GetCustomAttributes(typeof(URIAttribute), false).Length > 0;
@@ -227,8 +227,8 @@
         public void LocalSecrets_ShouldHaveURIAttribute()
         {
             // Arrange
-            var propertyInfo = typeof(Configuration.ConfigurationSource)
-                .GetProperty(nameof(Configuration.ConfigurationSource.LocalSecrets));
+            var propertyInfo = typeof(global::Baubit.Configuration.ConfigurationSource)
+                .GetProperty(nameof(global::Baubit.Configuration.ConfigurationSource.LocalSecrets));
 
             // Act
             var hasUriAttribute = propertyInfo?.GetCustomAttributes(typeof(URIAttribute), false).Length > 0;
@@ -241,8 +241,8 @@
         public void RawJsonStrings_ShouldNotHaveURIAttribute()
         {
             // Arrange
-            var propertyInfo = typeof(Configuration.ConfigurationSource)
-                .GetProperty(nameof(Configuration.ConfigurationSource.RawJsonStrings));
+            var propertyInfo = typeof(global::Baubit.Configuration.ConfigurationSource)
+                .GetProperty(nameof(global::Baubit.Configuration.ConfigurationSource.RawJsonStrings));
 
             // Act
             var hasUriAttribute = propertyInfo?.GetCustomAttributes(typeof(URIAttribute), false).Length > 0;
@@ -283,7 +283,7 @@
             };
 
             // Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 rawJsonStrings,
                 jsonUriStrings,
                 embeddedJsonResources,
@@ -312,7 +312,7 @@
             var originalRawJsonStrings = new List<string> { "{\"key\":\"value\"}" };
             
             // Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 originalRawJsonStrings,
                 null,
                 null,
@@ -332,7 +332,7 @@
         public void Properties_WithInitializers_ShouldAllowModification()
         {
             // Arrange
-            var configSource = new Configuration.ConfigurationSource(rawJsonStrings: new List<string> { "{\"initial\":\"value\"}" }, new List<string>(), new List<string>(), new List<string>());
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(rawJsonStrings: new List<string> { "{\"initial\":\"value\"}" }, new List<string>(), new List<string>(), new List<string>());
 
             // Act
             configSource.RawJsonStrings.Add("{\"added\":\"value\"}");
@@ -345,7 +345,7 @@
         public void Constructor_WithNullParameter_CreatesNewList()
         {
             // Arrange & Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 null,
                 null,
                 null,
@@ -376,7 +376,7 @@
             var emptyList = new List<string>();
 
             // Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 emptyList,
                 emptyList,
                 emptyList,
@@ -400,7 +400,7 @@
             var localSecrets = new List<string> { "MyApp-Secrets_2024" };
 
             // Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 rawJsonStrings,
                 jsonUriStrings,
                 embeddedJsonResources,
@@ -423,7 +423,7 @@
                 .ToList();
 
             // Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 largeList,
                 null,
                 null,
@@ -444,7 +444,7 @@
         public void ConfigurationSource_ShouldWorkWithAllPropertiesPopulated()
         {
             // Arrange & Act
-            var configSource = new Configuration.ConfigurationSource(
+            var configSource = new global::Baubit.Configuration.ConfigurationSource(
                 new List<string> 
                 { 
                     "{\"database\":\"localhost\"}",
@@ -484,8 +484,8 @@
         public void DefaultConstructor_Equals_EmptyProperty()
         {
             // Arrange
-            var defaultConstructed = new Configuration.ConfigurationSource();
-            var emptyProperty = Configuration.ConfigurationSource.Empty;
+            var defaultConstructed = new global::Baubit.Configuration.ConfigurationSource();
+            var emptyProperty = global::Baubit.Configuration.ConfigurationSource.Empty;
 
             // Assert - Verify they have the same structure (not same instance)
             Assert.NotSame(defaultConstructed, emptyProperty);
