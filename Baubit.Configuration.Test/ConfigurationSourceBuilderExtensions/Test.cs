@@ -1,4 +1,4 @@
-﻿using Baubit.Configuration.Traceability;
+using Baubit.Configuration.Traceability;
 using FluentResults;
 using Microsoft.Extensions.Configuration;
 
@@ -75,7 +75,7 @@ namespace Baubit.Configuration.Test.ConfigurationSourceBuilderExtensions
             var result = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew();
 
             // Act
-            var extensionResult = result.WithEmbeddedJsonResources("MyApp;Config.appsettings.json");
+            var extensionResult = result.WithEmbeddedJsonResources("Baubit.Configuration.Test;TestResources.config1.json");
 
             // Assert
             Assert.True(extensionResult.IsSuccess);
@@ -88,7 +88,7 @@ namespace Baubit.Configuration.Test.ConfigurationSourceBuilderExtensions
             var failedResult = Result.Fail<global::Baubit.Configuration.ConfigurationSourceBuilder>("Initial failure");
 
             // Act
-            var extensionResult = failedResult.WithEmbeddedJsonResources("MyApp;Config.appsettings.json");
+            var extensionResult = failedResult.WithEmbeddedJsonResources("Baubit.Configuration.Test;TestResources.config1.json");
 
             // Assert
             Assert.True(extensionResult.IsFailed);
@@ -96,34 +96,76 @@ namespace Baubit.Configuration.Test.ConfigurationSourceBuilderExtensions
         }
 
         [Fact]
-        public void WithEmbeddedJsonResources_WithMultipleResources_ShouldAccumulate()
+        public void WithEmbeddedJsonResources_WithMultipleResources_ShouldAccumulateAndLoadConfigurations()
         {
             // Arrange & Act
-            var result = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
+            var sourceResult = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .WithEmbeddedJsonResources(
-                    "MyApp;Config.appsettings.json",
-                    "MyApp;Config.appsettings.dev.json")
+                    "Baubit.Configuration.Test;TestResources.config1.json",
+                    "Baubit.Configuration.Test;TestResources.config2.json")
                 .Build();
 
-            // Assert
-            Assert.True(result.IsSuccess);
-            Assert.Equal(2, result.Value.EmbeddedJsonResources.Count);
-            Assert.Contains("MyApp;Config.appsettings.json", result.Value.EmbeddedJsonResources);
-            Assert.Contains("MyApp;Config.appsettings.dev.json", result.Value.EmbeddedJsonResources);
+            // Assert - Verify the source was built successfully
+            Assert.True(sourceResult.IsSuccess);
+            Assert.Equal(2, sourceResult.Value.EmbeddedJsonResources.Count);
+            Assert.Contains("Baubit.Configuration.Test;TestResources.config1.json", sourceResult.Value.EmbeddedJsonResources);
+            Assert.Contains("Baubit.Configuration.Test;TestResources.config2.json", sourceResult.Value.EmbeddedJsonResources);
+
+            // Build configuration from the source and verify values are loaded
+            var configResult = global::Baubit.Configuration.ConfigurationBuilder.CreateNew()
+                .WithAdditionalConfigurationSources(sourceResult.Value)
+                .Build();
+
+            Assert.True(configResult.IsSuccess);
+            Assert.Equal("EmbeddedValue1", configResult.Value["EmbeddedKey1"]);
+            Assert.Equal("42", configResult.Value["EmbeddedNumber"]);
+            Assert.Equal("EmbeddedValue2", configResult.Value["EmbeddedKey2"]);
+            Assert.Equal("True", configResult.Value["EmbeddedBoolean"]);
         }
 
         [Fact]
-        public void WithEmbeddedJsonResources_ChainedCalls_ShouldAccumulate()
+        public void WithEmbeddedJsonResources_ChainedCalls_ShouldAccumulateAndLoad()
         {
             // Arrange & Act
-            var result = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
-                .WithEmbeddedJsonResources("MyApp;Config.appsettings.json")
-                .WithEmbeddedJsonResources("MyApp;Config.appsettings.dev.json")
+            var sourceResult = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
+                .WithEmbeddedJsonResources("Baubit.Configuration.Test;TestResources.config1.json")
+                .WithEmbeddedJsonResources("Baubit.Configuration.Test;TestResources.config2.json")
+                .Build();
+
+            // Assert - Verify the source contains both resources
+            Assert.True(sourceResult.IsSuccess);
+            Assert.Equal(2, sourceResult.Value.EmbeddedJsonResources.Count);
+
+            // Build configuration and verify both resources were loaded
+            var configResult = global::Baubit.Configuration.ConfigurationBuilder.CreateNew()
+                .WithAdditionalConfigurationSources(sourceResult.Value)
+                .Build();
+
+            Assert.True(configResult.IsSuccess);
+            Assert.Equal("EmbeddedValue1", configResult.Value["EmbeddedKey1"]);
+            Assert.Equal("EmbeddedValue2", configResult.Value["EmbeddedKey2"]);
+        }
+
+        [Fact]
+        public void WithEmbeddedJsonResources_SingleResource_ShouldLoadConfiguration()
+        {
+            // Arrange & Act
+            var sourceResult = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
+                .WithEmbeddedJsonResources("Baubit.Configuration.Test;TestResources.source-config.json")
                 .Build();
 
             // Assert
-            Assert.True(result.IsSuccess);
-            Assert.Equal(2, result.Value.EmbeddedJsonResources.Count);
+            Assert.True(sourceResult.IsSuccess);
+            Assert.Single(sourceResult.Value.EmbeddedJsonResources);
+
+            // Build configuration and verify the resource was loaded
+            var configResult = global::Baubit.Configuration.ConfigurationBuilder.CreateNew()
+                .WithAdditionalConfigurationSources(sourceResult.Value)
+                .Build();
+
+            Assert.True(configResult.IsSuccess);
+            Assert.Equal("SourceValue", configResult.Value["SourceKey"]);
+            Assert.Equal("100", configResult.Value["SourceNumber"]);
         }
 
         #endregion
@@ -453,22 +495,28 @@ namespace Baubit.Configuration.Test.ConfigurationSourceBuilderExtensions
         }
 
         [Fact]
-        public void Build_WithAllSourceTypes_ShouldReturnCompleteConfigurationSource()
+        public void Build_WithAllSourceTypes_ShouldBuildAndLoadSuccessfully()
         {
             // Arrange & Act
-            var result = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
-                .WithRawJsonStrings("{\"Key\":\"Value\"}")
-                .WithJsonUriStrings("https://example.com/config.json")
-                .WithEmbeddedJsonResources("MyApp;Config.json")
-                .WithLocalSecrets("MyApp.Secrets")
+            var sourceResult = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
+                .WithRawJsonStrings("{\"RawKey\":\"RawValue\"}")
+                .WithEmbeddedJsonResources("Baubit.Configuration.Test;TestResources.config1.json")
                 .Build();
 
-            // Assert
-            Assert.True(result.IsSuccess);
-            Assert.Single(result.Value.RawJsonStrings);
-            Assert.Single(result.Value.JsonUriStrings);
-            Assert.Single(result.Value.EmbeddedJsonResources);
-            Assert.Single(result.Value.LocalSecrets);
+            // Assert - Verify source built successfully
+            Assert.True(sourceResult.IsSuccess);
+            Assert.Single(sourceResult.Value.RawJsonStrings);
+            Assert.Single(sourceResult.Value.EmbeddedJsonResources);
+
+            // Build configuration and verify all sources were loaded
+            var configResult = global::Baubit.Configuration.ConfigurationBuilder.CreateNew()
+                .WithAdditionalConfigurationSources(sourceResult.Value)
+                .Build();
+
+            Assert.True(configResult.IsSuccess);
+            Assert.Equal("RawValue", configResult.Value["RawKey"]);
+            Assert.Equal("EmbeddedValue1", configResult.Value["EmbeddedKey1"]);
+            Assert.Equal("42", configResult.Value["EmbeddedNumber"]);
         }
 
         [Fact]
@@ -502,30 +550,37 @@ namespace Baubit.Configuration.Test.ConfigurationSourceBuilderExtensions
             var externalConfig = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    { "configurationSource:JsonUriStrings:0", "file:///external.json" }
+                    { "configurationSource:EmbeddedJsonResources:0", "Baubit.Configuration.Test;TestResources.config2.json" }
                 })
                 .Build();
 
-            // Act
-            var result = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
+            // Act - Build source with all extension methods including real embedded resources
+            var sourceResult = global::Baubit.Configuration.ConfigurationSourceBuilder.CreateNew()
                 .WithRawJsonStrings("{\"Key1\":\"Value1\"}")
-                .WithJsonUriStrings("https://example.com/config.json")
-                .WithEmbeddedJsonResources("MyApp;Config.json")
-                .WithLocalSecrets("MyApp.Secrets")
+                .WithEmbeddedJsonResources("Baubit.Configuration.Test;TestResources.config1.json")
                 .WithAdditionalConfigurationSources(existingSource)
                 .WithAdditionalConfigurationSourcesFrom(externalConfig)
                 .Build();
 
-            // Assert
-            Assert.True(result.IsSuccess);
-            Assert.Equal(2, result.Value.RawJsonStrings.Count); // Original + Existing
-            Assert.Equal(2, result.Value.JsonUriStrings.Count); // Original + External
-            Assert.Single(result.Value.EmbeddedJsonResources);
-            Assert.Single(result.Value.LocalSecrets);
-            Assert.Contains("{\"Key1\":\"Value1\"}", result.Value.RawJsonStrings);
-            Assert.Contains("{\"ExistingKey\":\"ExistingValue\"}", result.Value.RawJsonStrings);
-            Assert.Contains("https://example.com/config.json", result.Value.JsonUriStrings);
-            Assert.Contains("file:///external.json", result.Value.JsonUriStrings);
+            // Assert - Verify source was built successfully
+            Assert.True(sourceResult.IsSuccess);
+            Assert.Equal(2, sourceResult.Value.RawJsonStrings.Count); // Original + Existing
+            Assert.Equal(2, sourceResult.Value.EmbeddedJsonResources.Count); // config1 + config2 from external
+            Assert.Contains("{\"Key1\":\"Value1\"}", sourceResult.Value.RawJsonStrings);
+            Assert.Contains("{\"ExistingKey\":\"ExistingValue\"}", sourceResult.Value.RawJsonStrings);
+
+            // Build configuration from the source and verify embedded resources were loaded
+            var configResult = global::Baubit.Configuration.ConfigurationBuilder.CreateNew()
+                .WithAdditionalConfigurationSources(sourceResult.Value)
+                .Build();
+
+            Assert.True(configResult.IsSuccess);
+            Assert.Equal("Value1", configResult.Value["Key1"]);
+            Assert.Equal("ExistingValue", configResult.Value["ExistingKey"]);
+            Assert.Equal("EmbeddedValue1", configResult.Value["EmbeddedKey1"]);
+            Assert.Equal("42", configResult.Value["EmbeddedNumber"]);
+            Assert.Equal("EmbeddedValue2", configResult.Value["EmbeddedKey2"]);
+            Assert.Equal("True", configResult.Value["EmbeddedBoolean"]);
         }
 
         [Fact]

@@ -22,4 +22,10 @@
     <ProjectReference Include="..\Baubit.Configuration\Baubit.Configuration.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="TestResources\config1.json" />
+    <EmbeddedResource Include="TestResources\config2.json" />
+    <EmbeddedResource Include="TestResources\source-config.json" />
+  </ItemGroup>
+
 </Project>
