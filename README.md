@@ -34,8 +34,8 @@ dotnet add package Baubit.Configuration
 using Baubit.Configuration;
 
 var result = ConfigurationBuilder.CreateNew()
-    .Bind(b => b.WithRawJsonStrings("{\"Database\":\"Server=localhost\"}"))
-    .Bind(b => b.Build());
+                                 .WithRawJsonStrings("{\"Database\":\"Server=localhost\"}")
+                                 .Build();
 
 if (result.IsSuccess)
 {
@@ -83,11 +83,11 @@ var result = builder.Build();
 
 ```csharp
 var result = ConfigurationBuilder.CreateNew()
-    .Bind(b => b.WithJsonUriStrings("file:///app/config.json"))
-    .Bind(b => b.WithEmbeddedJsonResources("MyApp;Config.appsettings.json"))
-    .Bind(b => b.WithLocalSecrets("MyApp-Secrets"))
-    .Bind(b => b.WithRawJsonStrings("{\"Override\":\"Value\"}"))
-    .Bind(b => b.Build());
+                                 .WithJsonUriStrings("file:///app/config.json")
+                                 .WithEmbeddedJsonResources("MyApp;Config.appsettings.json")
+                                 .WithLocalSecrets("MyApp-Secrets")
+                                 .WithRawJsonStrings("{\"Override\":\"Value\"}")
+                                 .Build();
 ```
 
 ### Validation
@@ -279,9 +279,8 @@ var result = builder.Build();
 ```csharp
 // Create and reuse configuration sources
 var baseSource = ConfigurationSourceBuilder.CreateNew()
-    .Bind(b => b.WithRawJsonStrings("{\"BaseKey\":\"BaseValue\"}"))
-    .Bind(b => b.Build())
-    .Value;
+                                           .WithRawJsonStrings("{\"BaseKey\":\"BaseValue\"}")
+                                           .Build().Value;
 
 var builder = ConfigurationBuilder.CreateNew();
 builder.WithAdditionalConfigurationSources(baseSource);
