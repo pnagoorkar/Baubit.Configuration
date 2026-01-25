@@ -579,7 +579,7 @@ namespace Baubit.Configuration
         /// <para>
         /// The build process executes the following steps in order:
         /// 1. Calls base <see cref="ConfigurationBuilder.Build"/> to create <see cref="IConfiguration"/>
-        /// 2. Binds the configuration to <typeparamref name="TConfiguration"/> using <see cref="IConfiguration.Get{T}"/>
+        /// 2. Binds the configuration to <typeparamref name="TConfiguration"/> using <c>IConfiguration.Get&lt;T&gt;</c>
         /// 3. If binding returns null, creates a new instance using <see cref="Activator.CreateInstance{T}"/>
         /// 4. Expands all URI properties marked with <see cref="URIAttribute"/> (environment variable substitution)
         /// 5. Executes all registered validators in sequence

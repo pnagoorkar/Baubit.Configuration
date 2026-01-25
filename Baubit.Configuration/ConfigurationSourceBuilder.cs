@@ -49,7 +49,7 @@ namespace Baubit.Configuration
         /// A <see cref="Result{T}"/> containing an empty <see cref="ConfigurationSource"/> if successful.
         /// </returns>
         /// <exception cref="Exception">
-        /// Throws if the build operation fails (via <see cref="Result{T}.ThrowIfFailed"/>).
+        /// Throws if the build operation fails (via <c>ThrowIfFailed</c>).
         /// </exception>
         public static Result<ConfigurationSource> BuildEmpty() => CreateNew().Bind(configSourceBuilder => configSourceBuilder.Build()).ThrowIfFailed();
 

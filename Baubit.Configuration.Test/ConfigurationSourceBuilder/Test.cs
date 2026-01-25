@@ -546,7 +546,7 @@ namespace Baubit.Configuration.Test.ConfigurationSourceBuilder
             result.Value.RawJsonStrings.Add("{\"another\":\"json\"}");
             
             // The built configuration should have its own copy
-            Assert.Single(result.Value.RawJsonStrings.Where(s => s == json));
+            Assert.Single(result.Value.RawJsonStrings, s => s == json);
         }
 
         #endregion

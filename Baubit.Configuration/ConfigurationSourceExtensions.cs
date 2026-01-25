@@ -351,9 +351,6 @@ namespace Baubit.Configuration
         /// Adds raw JSON strings as configuration streams.
         /// </summary>
         /// <param name="configurationSource">The source containing raw JSON strings.</param>
-        /// Adds raw JSON strings as configuration streams.
-        /// </summary>
-        /// <param name="configurationSource">The source containing raw JSON strings.</param>
         /// <param name="configurationBuilder">The builder to add JSON streams to.</param>
         /// <returns>A <see cref="Result{T}"/> containing the configuration source.</returns>
         private static Result<ConfigurationSource> AddRawJsonStrings(
